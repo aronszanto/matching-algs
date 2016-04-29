@@ -19,6 +19,7 @@ def assign_preferences():
     random.shuffle(agents)
 
     # assign agents preferences
+
     for agent in agents:
         agent.cardinal_prefs = [Distribution(
             item_mean, config.PREFERENCE_VAR).sample() for item_mean in item_means]
