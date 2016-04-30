@@ -1,3 +1,4 @@
+
 def TTC(agents):
     # check that all agents own items
     # this is a necessary condition
@@ -53,23 +54,34 @@ def TTC(agents):
             logging.debug("unknown " + str(unknown))
 
 
+            print "start with agent ", agents_remaining[0].id 
 
             # track a cycle, starting from agent and go around the arrow until a loop is found
             cycle_track = [agents_remaining[0]]
 
             next_item = most_preferred(cycle_track[-1], items_remaining)
             next_agent = owner(next_item)
+
+            print "next_item is ", next_item
+            print "next_agent is ", next_agent.id
+
             # if next_agent appears in cycle_track, a loop is found
             # from next_agent onward is a cycle; before that agent, not a cycle
             if next_agent in cycle_track:
                 start_index = cycle_track.index(next_agent)
+
+                print "next_agent in cycle_track, index ", start_index
+
                 # for agents not in this round's cycle
                 for agent in cycle_track[:start_index]:
+                    print "agent " + str(agent.id) + " appended to isNotCycle and removed from unknown"
                     isNotCycle.append(agent)
                     unknown.remove(agent)
+
+
                 # for agents in this round's cycle
                 # append the whole cycle to isCycle, not each agent separately
-                isCycle.append(agents[start_index:]) 
+                isCycle.append(cycle_track[start_index:]) 
                 # remove each agent in the cycle separately from unknown
                 for agent in cycle_track[start_index:]:
                     unknown.remove(agent)
