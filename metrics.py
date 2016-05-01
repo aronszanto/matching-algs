@@ -1,5 +1,6 @@
 import logging
 import copy
+from itertools import permutations
 
 
 '''
@@ -9,7 +10,7 @@ for example, agent_pairs = [(A1,[0.3,0.2]),(A2,[0.8,0.1])] means agent 1 is assi
 Access to agent.id and agent.ordinal_prefs necessary for stochastic dominance envy-free (type=sd)
 Access to agent.id and agent.cardinal_prefs necessary for cardinal envy-free (type=cardinal)
 '''
-def envyfree(agent_pairs, type='sd'):
+def IsEnvyFree(agent_pairs, type='sd'):
 	assert type == 'sd' or type == 'cardinal'
 	if type == 'sd':
 		return envyfree_sd(agent_pairs)
@@ -31,7 +32,7 @@ def sort_pref(probs, prefs):
 '''
 Helper function list_sd:
 Check whether list1 weakly stochastically dominates list2. 
-If list1 = [a0,...,ak] and list2 = [b0,...,bk] then list1 stochastically dominates list 2
+If list1 = [a0,...,ak] and list2 = [b0,...,bk] then list1 stochastically dominates list2
 iff a0+...+ai >= b0+...+bi for all 0<=i<=k
 '''
 def list_sd(list1, list2):
@@ -66,4 +67,27 @@ def envyfree_card(agent_pairs):
 			if utility(curr_agent, curr_probs) < utility(curr_agent, other_probs) :
 				return False
 	return True
+
+'''
+Check if agent assignment is Pareto Optimal. No probabilities involved
+Input: list of agents, access agent.id, agent.item (assigned), agent.ordinal_prefs
+'''
+def IsParetoOptimal(agents):
+	items = [agent.item for agent in agents]
+	# assignment is something like (0,2,1) -> agent 0 get item 0; agent 1 gets item 2; agent 2 gets item 1
+
+
+	# check if this assignment Pareto dominates the current assignment. 
+	# Yes, if everybody is at least better off and it is not the same assignment (so somebody is strictly better off)
+	for assignment in permutations(items):
+		# if the same assignment, continue (this is not gonna get you a Pareto dominating assignment)
+		if list(assignment) != items:
+			continue
+
+		IsEveryBodyBetterOff = True
+		for curr_agent in agents:
+			# Is curr_agent better off? If NO, assignment doesn't Pareto dominate, continue
+			
+
+
 
