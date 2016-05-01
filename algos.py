@@ -132,7 +132,9 @@ def TTC(agents):
                     #items_remaining_round.remove(agent.item)
 
                     assert agent.id in [agent.id for agent in unknown]
-                    unknown = [new_agent for new_agent in unknown if new_agent.id != agent.id]
+                    #unknown = [new_agent for new_agent in unknown if new_agent.id != agent.id]
+                    logging.debug("TEMP CHANGE TO DEBUG")
+                    unknown.remove(agent)
                     logging.debug("POST-REMOVAL")
                     logging.debug("unknown: " + str([(agent.id, agent.item) for agent in unknown]))
                     #unknown.remove(agent)
