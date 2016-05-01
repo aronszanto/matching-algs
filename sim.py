@@ -74,3 +74,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    logging.debug(metrics.IsParetoOptimal(
+            [   Agent(id = 3, item = 0, ordinal_prefs = [0, 2, 3, 1]),
+                Agent(id = 1, item = 1, ordinal_prefs = [0, 3, 2, 1]),
+                Agent(id = 2, item = 2, ordinal_prefs = [0, 3, 1, 2]),
+                Agent(id = 0, item = 3, ordinal_prefs = [1, 2, 0, 3])
+            ]))

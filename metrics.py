@@ -94,13 +94,26 @@ def IsParetoOptimal(agents):
 	# Yes, if everybody is at least better off and it is not the same assignment (so somebody is strictly better off)
 	for assignment in permutations(items):
 		# if the same assignment, continue (this is not gonna get you a Pareto dominating assignment)
-		if list(assignment) != items:
+		if list(assignment) == items:
 			continue
 
-		IsEveryBodyBetterOff = True
-		for curr_agent in agents:
+		
+		for i in range(len(items)):
 			# Is curr_agent better off? If NO, assignment doesn't Pareto dominate, continue
-			
+			curr_agent = agents[i]
+			curr_item = curr_agent.item
+			curr_pref = curr_agent.ordinal_prefs
+			new_item = assignment[i]
+			# if worse off = curr_item has higher index = lower priority
+			if curr_pref.index(curr_item) > curr_pref.index(new_item):
+				# returns the Pareto-dominating assignment
+				return assignment
+
+		# if you pass the above for loop, assignment doesn't Pareto dominate the current
+		# so run the big assignment perm for loop again
+	
+	# if you survive the big permutation loop, YES the current is Pareto Optimal
+	return True		
 
 
 
