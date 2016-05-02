@@ -21,11 +21,13 @@ def owner(item, agents):
     return None
 
 
+
 '''
 Does not alter the state of the input: agents 
 Return brand-new agents with same preferences but newly assigned items
 
 '''
+
 def TTC(agents):
     # check that all agents own items
     # this is a necessary condition
@@ -37,16 +39,18 @@ def TTC(agents):
     # dictionary of key=agent.id, value=agent.items_assigned
     FINAL_ASSIGNMENT = dict()
 
-    # list of items not yet traded; one traded, removed from items_remaining forever
-    items_remaining = [agent.item for agent in agents] 
-    agents_remaining = copy.deepcopy(agents) 
+    # list of items not yet traded; one traded, removed from items_remaining
+    # forever
+    items_remaining = [agent.item for agent in agents]
+    agents_remaining = copy.deepcopy(agents)
 
 
 
     round_num = 0
 
     # agents_remaining is global: removed only once traded
-    # each round has a agents_remaining round that keeps track of whether in cycle or not
+    # each round has a agents_remaining round that keeps track of whether in
+    # cycle or not
 
     # each iteration is a "round"
     while len(agents_remaining) > 0:
@@ -54,11 +58,11 @@ def TTC(agents):
         
         # logging.debug("-----ROUND " + str(round_num) + " -------")
         
+
         # Note: isCycle, isNotCycle and unknown tracks what cycles are formed in this particular round
         # so it is different from round to round
 
-        #agents_remaining_round = copy.deepcopy(agents_remaining)
-        
+        # agents_remaining_round = copy.deepcopy(agents_remaining)
 
         # a list of known cycles of agents like [[1,2],[4,5,6]]
         isCycle = []
@@ -70,148 +74,77 @@ def TTC(agents):
 
         # logging.debug("entering find-cycles loop")
 
-        # track a cycle, starting from agent and go around the arrow until a loop is found
+        # track a cycle, starting from agent and go around the arrow until a
+        # loop is found
         cycle_track = [unknown[0]]
 
         items_remaining = [l_agent.item for l_agent in agents_remaining]
 
         # logging.debug("items_remaining: " + str(items_remaining))
 
-        #items_remaining_round = copy.deepcopy(items_remaining)
+        # items_remaining_round = copy.deepcopy(items_remaining)
 
-        # keep looping, putting unknown into either isCycle or isNotCycle until unknown is empty
+        # keep looping, putting unknown into either isCycle or isNotCycle until
+        # unknown is empty
         while len(unknown) > 0:
 
-            # logging.debug("BEGIN CATEGORIZING LOOP")
-
-            # logging.debug("isCycle: " + str([[(l_agent.id, l_agent.item) for l_agent in l_cycle] for l_cycle in isCycle]))
-            # logging.debug("isNotCycle " + str([(l_agent.id, l_agent.item) for l_agent in isNotCycle]))
-            # logging.debug("unknown " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
-
-
-            # logging.debug("start with agent "+ str(unknown[0].id) )
-
-
-
-
+            logging.debug("start with agent " + str(unknown[0].id))
 
             next_item = most_preferred(cycle_track[-1], items_remaining)
-            #logging.debug("agents " + str([(agent.id, agent.item) for agent in agents]))
+            # logging.debug("agents " + str([(agent.id, agent.item) for agent
+            # in agents]))
             next_agent = owner(next_item, agents_remaining)
+
 
             # logging.debug("next_item is "+ str(next_item))
             # logging.debug("next_agent is "+ str(next_agent.id))
             # logging.debug("cycle_track is "+ str([(agent.id, agent.item) for agent in cycle_track]))
 
+
             # if next_agent appears in cycle_track, a loop is found
             # from next_agent onward is a cycle; before that agent, not a cycle
             if next_agent.id in [l_agent.id for l_agent in cycle_track]:
 
-
-                #start_index = cycle_track.index(next_agent)
-
                 start_index = [l_agent.id for l_agent in cycle_track].index(next_agent.id)
-
-                # logging.debug("next_agent in cycle_track, index "+str(start_index))
-
-                # logging.debug("current unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
 
                 # logging.debug("before this is not a cycle")
 
                 # for agents not in this round's cycle
                 for agent in cycle_track[:start_index]:
-                    # logging.debug("agent " + str(agent.id) + " appended to isNotCycle and removed from unknown")
+
+
                     isNotCycle.append(agent)
-                    #items_remaining_round.remove(agent.item)
+                    unknown.remove(agent)
 
-                    # logging.debug("PRE-REMOVAL ASSERT")
-                    # logging.debug("agent: " + str((agent.id, agent.item)))
-                    # logging.debug("current unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
-                    # assert agent.id in [l_agent.id for l_agent in unknown]
-                    # unknown = [l_agent for l_agent in unknown if l_agent.id != agent.id]
-                    # logging.debug("POST-REMOVAL")
-                    # logging.debug("unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
-                    #unknown.remove(agent)
-
-                # logging.debug("after this is a cycle")
-                # for agents in this round's cycle
-                # append the whole cycle to isCycle, not each agent separately
-                isCycle.append(cycle_track[start_index:]) 
+                isCycle.append(cycle_track[start_index:])
                 # remove each agent in the cycle separately from unknown
 
-                #unknown = [agent for agent in unknown if agent.id not in [agent.id for agent in cycle_track[start_index:]]]
                 for agent in cycle_track[start_index:]:
-                    # logging.debug("PRE-REMOVAL ASSERT")
-                    # logging.debug("agent: " + str((agent.id, agent.item)))
-                    # logging.debug("current unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
-
-                    # items_remaining_round.remove(agent.item)
 
                     assert agent.id in [l_agent.id for l_agent in unknown]
-                    
-                    # logging.debug("TEMP CHANGE TO DEBUG")
-                    unknown = [l_agent for l_agent in unknown if l_agent.id != agent.id]
-                    
-                    # logging.debug("POST-REMOVAL")
-                    # logging.debug("unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
-                    #unknown.remove(agent)
-                    # remove from unknown *and* remove from agents_remaining (will trade)
+                    unknown.remove(agent)
+                    # remove from unknown *and* remove from agents_remaining
+                    # (will trade) removal from agents_remaining happens later when isCycle is completed
 
                 # reset cycle_track
                 if len(unknown) > 0:
                     cycle_track = [unknown[0]]
-                    # logging.debug("reset cycle_track, now: "+str([(l_agent.id, l_agent.item) for l_agent in cycle_track]))
+
 
             elif next_agent.id in [l_agent.id for l_agent in unknown]:
-                # logging.debug("cycle_track append agent " + str(next_agent.id))
                 cycle_track.append(next_agent)
-                # logging.debug("current cycle_track: " + str([(l_agent.id, l_agent.item) for l_agent in cycle_track]))
             else:
                 # not unknown, so either in cycle or not in cycle
                 # in both cases, the whole thing preceding it cannot be in a cycle
                 # logging.debug("hit the known, the whole thing is not in cycle")
-                # logging.debug("TO CHECK BUG")
-                # logging.debug("next_agent.id " + str(next_agent.id))
-                # logging.debug("current unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
+
                 for agent in cycle_track:
-                    # logging.debug("BEFORE isNotCycle append and unknown remove")
-                    # logging.debug("current unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
-                    # logging.debug("agent: " + str((agent.id, agent.item)))
-                    
-
                     isNotCycle.append(agent)
-                    #items_remaining_round.remove(agent.item)
-                    # logging.debug("PRE-REMOVAL ASSERT")
-                    # logging.debug("agent: " + str((agent.id, agent.item)))
-                    # logging.debug("current unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
-                    # assert agent.id in [l_agent.id for l_agent in unknown]
-                    # logging.debug("UNKNOWN REMOVAL")
-                    # logging.debug("PRE-REMOVAL")
-                    # logging.debug("agent " + str((agent.id, agent.item)))
-                    # logging.debug("unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
-                    unknown = [l_agent for l_agent in unknown if l_agent.id != agent.id]
-                    # logging.debug("POST-REMOVAL")
-                    # logging.debug("unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
-                    #unknown.remove(agent)
-                
-
-                # logging.debug("POST REMOVAL")
-                # logging.debug("agent " + str(agent.id) + " appended to isNotCycle and removed from unknown")
-                # logging.debug("current isNotCycle: " + str([(l_agent.id, l_agent.item) for l_agent in isNotCycle]))
-                # logging.debug("current isCycle: " + str([[(l_agent.id, l_agent.item) for l_agent in l_cycle] for l_cycle in isCycle]))
-                # logging.debug("current agents_remaining: " + str([(l_agent.id, l_agent.item) for l_agent in agents_remaining]))
-                # logging.debug("current unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
+                    unknown.remove(agent)
 
                 # reset cycle_track
                 if len(unknown) > 0:
                     cycle_track = [unknown[0]]
-                    # logging.debug("reset cycle_track, now: "+str([(l_agent.id, l_agent.item) for l_agent in cycle_track]))
-
-        # finish categorizing isCycle or isNotCycle, unknown should be empty now
-        # logging.debug("----- ROUND " + str(round_num) + " CATEGORIZATION COMPLETED --------")
-        # logging.debug("current isNotCycle: " + str([(l_agent.id, l_agent.item) for l_agent in isNotCycle]))
-        # logging.debug("current isCycle: " + str([[(l_agent.id, l_agent.item) for l_agent in l_cycle] for l_cycle in isCycle]))
-
 
 
         for cycle in isCycle:
@@ -227,28 +160,23 @@ def TTC(agents):
 
             
 
-
             # assign items to agents
             for i in range(len(cycle)):
+
                 cycle[i].item = items_to_assign[i]
                 FINAL_ASSIGNMENT[cycle[i].id] = items_to_assign[i]
                 # logging.debug("agent " + str(cycle[i].id) + " is assigned item " + str(cycle[i].item))
 
-            # remove all agents and items just traded from agents_remaining and items_remaining
+
+            # remove all agents and items just traded from agents_remaining and
+            # items_remaining
             for agent in cycle:
-                # logging.debug("remove agents in cycle")
-                # logging.debug("pre-removal")
-                # logging.debug("current isNotCycle: " + str([(l_agent.id, l_agent.item) for l_agent in isNotCycle]))
-                # logging.debug("current isCycle: " + str([[(l_agent.id, l_agent.item) for l_agent in l_cycle] for l_cycle in isCycle]))
-                # logging.debug("current agents_remaining: " + str([(l_agent.id, l_agent.item) for l_agent in agents_remaining]))
-                # logging.debug("agent to remove: " + str(agent))
+
                 agents_remaining.remove(agent)
                 items_remaining.remove(agent.item)
 
         round_num += 1
 
-        # logging.debug("------- END OF ROUND --------")
-        # logging.debug("current agents_remaining: " + str([(l_agent.id, l_agent.item) for l_agent in agents_remaining]))
 
     # NOTE: during the course of the algo, the input "agents" is not touched at all intentionally
     # so it doesn't change the state of agents in the original program where TTC is called
@@ -380,7 +308,5 @@ def YRMH_IGYT(agents, items):
                                )
 
     return agents_to_return
-
-
 
 

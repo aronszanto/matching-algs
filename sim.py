@@ -43,7 +43,7 @@ def assign_preferences():
     logging.debug(agents[0].ordinal_prefs)
 
     # for TTC, every agent owns a house a priori
-    for i in xrange(config.NUM_AGENTS/2):
+    for i in xrange(config.NUM_AGENTS):
         agents[i].item = i
 
     return agents
@@ -68,11 +68,11 @@ def main():
         print agent.id, agent.item, agent.ordinal_prefs
         logging.debug("agent.id, agent.item, agent.ordinal_prefs: " + str((agent.id, agent.item, agent.ordinal_prefs)))
 
-    # print "TTC agents"
-    # logging.debug("TTC AGENTS")
-    # for agent in TTC(agents):
-    #     print agent.id, agent.item, agent.ordinal_prefs
-    #     logging.debug("agent.id, agent.item, agent.ordinal_prefs: " + str((agent.id, agent.item, agent.ordinal_prefs)))
+    print "TTC agents"
+    logging.debug("TTC AGENTS")
+    for agent in TTC(agents):
+        print agent.id, agent.item, agent.ordinal_prefs
+        logging.debug("agent.id, agent.item, agent.ordinal_prefs: " + str((agent.id, agent.item, agent.ordinal_prefs)))
 
     print "YRMH_IGYT agents"
     logging.debug("YRMH_IGYT AGENTS")
