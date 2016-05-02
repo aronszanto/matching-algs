@@ -11,4 +11,7 @@ class Agent:
 
     def __eq__(self, other):
         return (self.id == other.id and self.cardinal_prefs ==
-                other.cardinal_prefs and self.ordinal_prefs=other.ordinal_prefs)
+                other.cardinal_prefs and self.ordinal_prefs == other.ordinal_prefs)
+
+    def __str__(self):
+        return str((self.id, self.item))
