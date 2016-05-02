@@ -7,10 +7,12 @@ import numpy as np
 import logging
 import metrics
 
-from algos import TTC
+from algos import TTC, YRMH_IGYT
 
 
 def assign_preferences():
+
+    random.seed(100)
 
     # create means
     item_means = [Distribution(config.ITEM_MEAN, config.ITEM_VAR).sample()
@@ -51,14 +53,14 @@ def main():
 
     logging.basicConfig(filename='matching.log', filemode='w', level=logging.DEBUG)
 
-    # agents = assign_preferences()
+    agents = assign_preferences()
 
     # hard-code, for debugging
-    agents = [  Agent(id = 3, item = 0, ordinal_prefs = [0, 2, 3, 1]),
-                Agent(id = 1, item = 1, ordinal_prefs = [0, 3, 2, 1]),
-                Agent(id = 2, item = 2, ordinal_prefs = [0, 3, 1, 2]),
-                Agent(id = 0, item = 3, ordinal_prefs = [0, 3, 1, 2])
-             ]
+    # agents = [  Agent(id = 3, item = 0, ordinal_prefs = [1, 2, 3, 0]),
+    #             Agent(id = 1, item = 1, ordinal_prefs = [0, 3, 2, 1]),
+    #             Agent(id = 2, item = 2, ordinal_prefs = [0, 3, 1, 2]),
+    #             Agent(id = 0, item = 3, ordinal_prefs = [0, 3, 1, 2])
+    #          ]
 
     print "initial agents"
     logging.debug("INITIAL AGENTS")
@@ -69,6 +71,11 @@ def main():
     print "TTC agents"
     logging.debug("TTC AGENTS")
     for agent in TTC(agents):
+        print agent.id, agent.item, agent.ordinal_prefs
+        logging.debug("agent.id, agent.item, agent.ordinal_prefs: " + str((agent.id, agent.item, agent.ordinal_prefs)))
+
+    print "YRMH_IGYT agents"
+    for agent in YRMH_IGYT(agents, range(len(agents))):
         print agent.id, agent.item, agent.ordinal_prefs
         logging.debug("agent.id, agent.item, agent.ordinal_prefs: " + str((agent.id, agent.item, agent.ordinal_prefs)))
 
