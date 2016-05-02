@@ -145,12 +145,12 @@ def TTC(agents):
                     # logging.debug("agent: " + str((agent.id, agent.item)))
                     # logging.debug("current unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
 
-                    #items_remaining_round.remove(agent.item)
+                    # items_remaining_round.remove(agent.item)
 
-                    # assert agent.id in [l_agent.id for l_agent in unknown]
+                    assert agent.id in [l_agent.id for l_agent in unknown]
                     
                     # logging.debug("TEMP CHANGE TO DEBUG")
-                    unknown.remove(agent)
+                    unknown = [l_agent for l_agent in unknown if l_agent.id != agent.id]
                     
                     # logging.debug("POST-REMOVAL")
                     # logging.debug("unknown: " + str([(l_agent.id, l_agent.item) for l_agent in unknown]))
@@ -241,6 +241,7 @@ def TTC(agents):
                 # logging.debug("current isNotCycle: " + str([(l_agent.id, l_agent.item) for l_agent in isNotCycle]))
                 # logging.debug("current isCycle: " + str([[(l_agent.id, l_agent.item) for l_agent in l_cycle] for l_cycle in isCycle]))
                 # logging.debug("current agents_remaining: " + str([(l_agent.id, l_agent.item) for l_agent in agents_remaining]))
+                # logging.debug("agent to remove: " + str(agent))
                 agents_remaining.remove(agent)
                 items_remaining.remove(agent.item)
 
@@ -268,11 +269,21 @@ def YRMH_IGYT(agents, items):
     # helper function, check if request_loop is a loop
     def IsRequestLoop(request_loop):
         assert len(request_loop) > 0
-        return (request_loop[0][0].id == request_loop[-1][1].id)
+        last_requestee = request_loop[-1][1]
+        # if last_requestee appears earlier as requester, loop is found, return the reappearing requester index
+        # otherwise return -1 
+        try:
+            loop_start_index = [requester for (requester, requestee) in request_loop].index(last_requestee)
+            return loop_start_index
+        # if not in list, ValueError
+        except ValueError:
+            return -1
+
 
     # priority order will also function as agent_remaining: remove once assigned
     priority_order = copy.deepcopy(agents)
     random.shuffle(priority_order)
+
 
     # this is to track whether a request loop occurs. 
     # A request loop is, e.g. A4 requests A5's item and A5 requests A4's item. 
@@ -281,17 +292,29 @@ def YRMH_IGYT(agents, items):
 
     FINAL_ASSIGNMENT = dict()
 
-    print "agents: " + str(agents)
-    print "starting priority_order: " + str(priority_order)
+    logging.debug("agents: " + str(agents))
+    logging.debug("starting priority_order: " + str(priority_order))
 
-    items_remaining = [l_agent.item for l_agent in priority_order]
+    items_remaining = items
+
+    logging.debug("beginning items_remaining: " + str(items_remaining))
 
     while len(priority_order) > 0:
         curr_agent = priority_order[0]
         requested_item = most_preferred(curr_agent, items_remaining)
         requested_item_owner = owner(requested_item, priority_order)
+
+        logging.debug("curr_agent: " + str(curr_agent))
+        logging.debug("requested_item: " + str(requested_item))
+        logging.debug("requested_item_owner: " + str(requested_item_owner))
+
+
         # if the requested item has no owner, assign it permanently and take the agent and item off the list
         if requested_item_owner is None:
+
+            logging.debug("requested_item_owner is None")
+            logging.debug("FINAL ASSIGN AGENT " + str(curr_agent.id) + " TO ITEM " + str(requested_item))
+
             # curr_agent gives up its current item to get the requested one; assignment finalized
             # curr_agent.item = requested_item -- actually this is not necessary 
             # because curr_agent is taken off priority list anyway
@@ -299,22 +322,54 @@ def YRMH_IGYT(agents, items):
             priority_order.remove(curr_agent)
             items_remaining.remove(requested_item)
 
+            # reset request_loop
+            request_loop = []
+
         # someone owns the requested house
         # that owner gets his turn (move to top of priority order) and record the request in request_loop
         # check if loop occurs, if YES, trade and remove
         else:
+
+            logging.debug("requested_item_owner is not None")
+
+            logging.debug("Before request_loop append and priority reorder")
+            logging.debug("request_loop: " + str(request_loop))
+            logging.debug("priority_order: " + str(priority_order))
+
             request_loop.append((curr_agent, requested_item_owner))
             # remove owner from list and insert at index 0
             priority_order.remove(requested_item_owner)
             priority_order.insert(0, requested_item_owner)
+
+            
+            logging.debug("After request_loop append and priority reorder")
+            logging.debug("request_loop: " + str(request_loop))
+            logging.debug("priority_order: " + str(priority_order))
+
+            loop_start_index = IsRequestLoop(request_loop)
+
             # if loop yes, trade and remove
-            if IsRequestLoop(request_loop):
+            if loop_start_index != -1:
+                logging.debug("IsRequestLoop True")
+
+                # only from index loop_start_index onward in request_loop that is actually a loop
+                request_loop = request_loop[loop_start_index:] 
+
+                logging.debug("truncated request_loop: " + str(request_loop))               
+
                 # assign the requested items
                 # and remove requester (aka all agents involved) off priority list
                 for (requester, requestee) in request_loop:
                     FINAL_ASSIGNMENT[requester.id] = requestee.item 
                     priority_order.remove(requester)
                     items_remaining.remove(requestee.item)
+
+                # done with request_loop, back to empty
+                request_loop = []
+
+            else:
+                logging.debug("IsRequestLoop False")
+                pass
 
     agents_to_return = []
     for agent in agents:

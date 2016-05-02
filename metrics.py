@@ -85,9 +85,13 @@ def envyfree_card(agent_pairs):
 '''
 Check if agent assignment is Pareto Optimal. No probabilities involved
 Input: list of agents, access agent.id, agent.item (assigned), agent.ordinal_prefs
+Return: True if Pareto optimal, a Pareto-dominating assignment if not Pareto optimal
 '''
-def IsParetoOptimal(agents):
-	items = [agent.item for agent in agents]
+def IsParetoOptimal(agents, items):
+	
+	# we specify input items instead of extracting them from agents because
+	# in YRM some agents don't have items 
+
 	# assignment is something like (0,2,1) -> agent 0 get item 0; agent 1 gets item 2; agent 2 gets item 1
 
 	# check if this assignment Pareto dominates the current assignment. 

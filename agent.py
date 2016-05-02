@@ -9,8 +9,8 @@ class Agent:
         self.cardinal_prefs = cardinal_prefs
         self.ordinal_prefs = ordinal_prefs
 
-    # def __eq__(self, other):
-    #     return (self.id == other.id)
+    def __eq__(self, other):
+        return (self.id == other.id)
 
     def __str__(self):
     	return str((self.id,self.item))
