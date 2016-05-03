@@ -83,4 +83,7 @@ target/
 *.mtc
 *.mtc1
 *.out
+*.pdf
+*.fls
+*.fdb*
 *.synctex.gz
