@@ -88,6 +88,9 @@ NUM_AGENTS = 100
 \section*{Algorithms}
 %%TODO, JERRY TALK ABOUT THE IMPLEMENTATION OF TTC AND YRM AND HOW THEY DIFFER IN INPUT AND OUTPUT
 
+The final algorithm we implement is the Probabilistic Serial mechanism, a special case of the group of algorithms known as "Eating Algorithms", a name that fits very nicely! The algorithm involves a unit block of time, where at each $t \in [0, 1]$, each agent is "consuming" some probability of acquiring some item, where the item they are each eating is their top-rated, available (i.e., not totally consumed) item.\\\\In our implementation\footnote{NB: For the remainder of the section, we will call the reader's attention to various line numbers in the file \text{prob\textunderscore serial.py}.}, we model continuous time as arbitrarily resolute time-slices, and we denote each slice as a \emph{round}.
+
+Each item has a corresponding number of "morsels" that it has left: this denotes implicitly the fraction of the item's probability that is "left". In each round, an agent takes one bite out of the item that they most prefer of the set of items reminding, i.e., they acquire one morsel of the item that they are most partial towards, from all the items that still have morsels. In each iteration, the order of agents is shuffled (so as to eliminate the possibility of a corner case wherein there are several instances when each of $n$ agents wants to eat the same item, with fewer than $n$ morsels remaining, benefiting the first few agents in the order).
 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Metrics}
