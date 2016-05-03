@@ -117,6 +117,21 @@ The final algorithm we implement is the Probabilistic Serial mechanism, a specia
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Metrics}
 %%TODO, JERRY TALK ABOUT THE MATHEMATICAL DEFINITION OF YOUR METRICS AND ABOUT THE IMPLEMENTATION OF YOUR METRICS
+
+We focus on two properties of the allocation: envy-freeness and Pareto Optimality. 
+
+Intuitively speaking, envy-freeness means that each agent weakly prefers her allocation over every other agents' allocation. This notion is often used with probability distribution. So we need to define mathematically what it means to prefer a list of distribution over the other.
+
+Definition. A list $\mathbf{a} = [a_1, \dots, a_k]$ \textit{stochastically dominates} another list $\mathbf{b} = [b_1, \dots, b_k]$ iff for all $0 \leq i \leq k$, $$ \sum_{r=1}^i a_r \geq \sum_{r=1}^i b_r $$
+
+Definition. A \textit{sorted preference list} of agent $a$ is a list $[p_1, \cdots, p_k]$ such that $p_t$ is the probability that agent $i$ is assigned her $t$th most preferred item, for $1 \leq t \leq k$.
+
+Definition. An allocation is \textit{ex-ante ordinal envy-free} if for every agent $a$, the sorted preference list of $a$ stochastically dominates the sorted preference list of $a'$ for any agent $a'$.
+
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Experimental Results}
 %% PUT TTC, YRM, EF, PO TEST OUTPUT HERE AND EXPLAIN THE CONFIGURATION THAT YOU USED. SEE LINES 55-85 FOR A MODEL

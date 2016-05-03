@@ -2,6 +2,10 @@ import logging
 import copy
 from agent import Agent
 import random
+import config
+
+from sim import assign_preferences
+from metrics import IsEnvyFree, IsParetoOptimal
 
 # helper function
 # given an agent and a list of items available, find the most preferred item
@@ -214,8 +218,8 @@ def YRMH_IGYT(agents, items):
 
     FINAL_ASSIGNMENT = dict()
 
-    logging.debug("agents: " + str(agents))
-    logging.debug("starting priority_order: " + str(priority_order))
+    # logging.debug("agents: " + str(agents))
+    # logging.debug("starting priority_order: " + str(priority_order))
 
     items_remaining = items
 
@@ -226,17 +230,17 @@ def YRMH_IGYT(agents, items):
         requested_item = most_preferred(curr_agent, items_remaining)
         requested_item_owner = owner(requested_item, priority_order)
 
-        logging.debug("curr_agent: " + str(curr_agent))
-        logging.debug("requested_item: " + str(requested_item))
-        logging.debug("requested_item_owner: " + str(requested_item_owner))
+        # logging.debug("curr_agent: " + str(curr_agent))
+        # logging.debug("requested_item: " + str(requested_item))
+        # logging.debug("requested_item_owner: " + str(requested_item_owner))
 
         # if the requested item has no owner, assign it permanently and take
         # the agent and item off the list
         if requested_item_owner is None:
 
-            logging.debug("requested_item_owner is None")
-            logging.debug("FINAL ASSIGN AGENT " +
-                          str(curr_agent.id) + " TO ITEM " + str(requested_item))
+            # logging.debug("requested_item_owner is None")
+            # logging.debug("FINAL ASSIGN AGENT " +
+            #               str(curr_agent.id) + " TO ITEM " + str(requested_item))
 
             # curr_agent gives up its current item to get the requested one; assignment finalized
             # curr_agent.item = requested_item -- actually this is not necessary
@@ -253,20 +257,20 @@ def YRMH_IGYT(agents, items):
         # check if loop occurs, if YES, trade and remove
         else:
 
-            logging.debug("requested_item_owner is not None")
+            # logging.debug("requested_item_owner is not None")
 
-            logging.debug("Before request_loop append and priority reorder")
-            logging.debug("request_loop: " + str(request_loop))
-            logging.debug("priority_order: " + str(priority_order))
+            # logging.debug("Before request_loop append and priority reorder")
+            # logging.debug("request_loop: " + str(request_loop))
+            # logging.debug("priority_order: " + str(priority_order))
 
             request_loop.append((curr_agent, requested_item_owner))
             # remove owner from list and insert at index 0
             priority_order.remove(requested_item_owner)
             priority_order.insert(0, requested_item_owner)
 
-            logging.debug("After request_loop append and priority reorder")
-            logging.debug("request_loop: " + str(request_loop))
-            logging.debug("priority_order: " + str(priority_order))
+            # logging.debug("After request_loop append and priority reorder")
+            # logging.debug("request_loop: " + str(request_loop))
+            # logging.debug("priority_order: " + str(priority_order))
 
             loop_start_index = IsRequestLoop(request_loop)
 
@@ -292,7 +296,7 @@ def YRMH_IGYT(agents, items):
                 request_loop = []
 
             else:
-                logging.debug("IsRequestLoop False")
+                # logging.debug("IsRequestLoop False")
                 pass
 
     agents_to_return = []
@@ -304,3 +308,42 @@ def YRMH_IGYT(agents, items):
                                 )
 
     return agents_to_return
+
+
+def test_TTC():
+
+    print "-------------------- TTC TESTING --------------------"
+
+    agents = assign_preferences()
+
+    print "Input agents"
+    
+    for agent in agents:
+        print "Agent " + str(agent.id) + " owns item " + str(agent.item) + " and has ordinal pref " + str(agent.ordinal_prefs)
+
+    print "TTC Output agents"
+    ttc_agents = TTC(agents)
+    for agent in ttc_agents:
+        print "Agent " + str(agent.id) + " owns item " + str(agent.item) + " and has ordinal pref " + str(agent.ordinal_prefs)
+
+    print "Is TTC Pareto Optimal? If yes, says True. If no, returns a Pareto-dominating allocation"
+    print IsParetoOptimal(ttc_agents, range(len(ttc_agents)))
+
+def test_YRMH():
+
+    print "-------------------- YRMH-IGYT TESTING --------------------"
+    agents = assign_preferences(num_items_assigned=config.NUM_AGENTS/2)
+
+    print "Input agents"
+    
+    for agent in agents:
+        print "Agent " + str(agent.id) + " owns item " + str(agent.item) + " and has ordinal pref " + str(agent.ordinal_prefs)
+
+    print "YRMH-IGYT Output agents"
+    yrmh_agents = YRMH_IGYT(agents, range(len(agents)))
+    for agent in yrmh_agents:
+        print "Agent " + str(agent.id) + " owns item " + str(agent.item) + " and has ordinal pref " + str(agent.ordinal_prefs)
+
+    print "Is YRMH-IGYT Pareto Optimal? If yes, says True. If no, returns a Pareto-dominating allocation"
+    print IsParetoOptimal(yrmh_agents, range(len(yrmh_agents)))
+
