@@ -42,8 +42,11 @@
 
 \begin{document}
 \maketitle
+
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Introduction}
+In this project, we consider the housing market problem from a variety of perspectives, both theoretical and practical. In the simplest formulation of this classic problem, a set $N$ of agents owns a set $H$ of houses, and the goal is to find a matching that is Pareto-optimal. Roughly speaking, this implies that under the matching scheme, there is no deviation benefiting an agent $i$ that would not decrease the utility of an agent $j \neq i$, for all $i$ and $j$.\\\\
+The problem becomes more interesting when a certain amount of leeway is granted with respect to the parameters of possible solutions. By opening the door to probabilistic algorithms, tweaks to the initial ownership schema, and permutations of preference generation, some very interesting results can be derived, especially when the metrics used to discuss solutions are broadened beyond simple Pareto-optimality.\\\\For our project, we were interested in programming three of the most important algorithms associated with the house allocation problem, in addition to developing software to analyze the efficiency and quality of the solutions output. In particular, we created programs in the python language to model the Top Trading Cycles, You Request My House I Get Your Turn, and Probabilistic Serial algorithms, hereafter referred to simply by their (perhaps truncated) initials (TTC, YRM, PS, respectively). In addition, we analyzed the solutions returned by these procedures via metrics including ex-post Pareto-optimality, time complexity (performance speed), and envy-freeness. Last, we played with preference generation, considering the Mallow model but settling on a scheme relying upon cardinal utilities modeled from a hierarchical normal distribution, guaranteeing correlated preferences. While our writeup will highlight our findings and showcase the most important pieces of our project, we stress that the brunt of the effort expended on this collaboration went into an extensive implementation of the several algorithms and solution metrics, the entirety of which is included with this paper. At certain points in the paper, we will direct the reader to run the scripts associated with certain files if so desired, to see results firsthand. In addition, we will often provide sample output within the text so as to avoid extensive context-switching.\\\\In the first section, we will discuss the preference generation techniques utilized to parametrize our agents' utilities. Next, we will give an overview of the algorithms that we coded. Following that, we detail the metrics used to analyze the quality of the solutions we generate. We then move to our experimental results, showing sample inputs and outputs to our algorithms. Ultimately, we discuss the challenges we faced and address some of the reasoning behind our design decisions in our conclusion.
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Preferences}
 
@@ -56,7 +59,7 @@
 \section*{Experimental Results}
 
 %%%%%%%%%%%%%%%%%%%%%
-\section*{Metrics}
+\section*{Conclusion}
 %%%%%%%%%%%%%%%%%%%%%
 
 \end{document}
