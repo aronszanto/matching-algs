@@ -86,7 +86,7 @@ NUM_AGENTS = 100
 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Algorithms}
-%%TODO, JERRY TALK ABOUT THE IMPLEMENTATION OF TTC AND YRM AND HOW THEY DIFFER IN INPUT AND OUTPUT
+%%TODO, JERRY TALK ABOUT THE IMPLEMENTATION OF TTC AND YRM AND HOW THEY DIFFER IN INPUT AND OUTPUT, see 91-92 for model
 
 The final algorithm we implement is the Probabilistic Serial mechanism, a special case of the group of algorithms known as "Eating Algorithms", a name that fits very nicely! The algorithm involves a unit block of time, where at each $t \in [0, 1]$, each agent is "consuming" some probability of acquiring some item, where the item they are each eating is their top-rated, available (i.e., not totally consumed) item.\\\\In our implementation\footnote{NB: For the remainder of the section, we will call the reader's attention to various line numbers in the file \text{prob\textunderscore serial.py}.}, we model continuous time as arbitrarily resolute time-slices, and we denote each slice as a \emph{round}.
 \\\\Each item has a corresponding number of "morsels" that it has left (line 15): this denotes implicitly the fraction of the item's probability that is "left". In each round, an agent takes one bite out of the item that they most prefer of the set of items reminding, i.e., they acquire one morsel of the item that they are most partial towards, from all the items that still have morsels. In each iteration, the order of agents is shuffled (line 52; so as to eliminate the possibility of a corner case wherein there are several instances when each of $n$ agents wants to eat the same item, with fewer than $n$ morsels remaining, benefiting the first few agents in the order). At the end, the probability distribution is output (line 82; 85) in either fractional or decimal form, and we check that the resulting matrix (rows of houses, columns of agents) is doubly stochastic, i.e., all the rows and all the columns sum to 1. This is the expected behavior, because assuming well-defined preferences over every item, and that each agent owns a house to begin with, the probability that an agent gets no house should be 0, and the probability that a particular house is not allocated should be 0. (To see output for PS, run the procedure \emph{test\textunderscore ps()} from the file.)\\\\We note that moving from this probability matrix to an allocation is a trivial matter of flipping a biased coin and allocating each house sequentially, and is not implemented in our project, as most outputs of PS that we've seen in the literature is the doubly-stochastic matrix rather than an outcome drawn from that distribution.
@@ -97,6 +97,46 @@ The final algorithm we implement is the Probabilistic Serial mechanism, a specia
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Experimental Results}
 %% PUT TTC, YRM, EF, PO TEST OUTPUT HERE AND EXPLAIN THE CONFIGURATION THAT YOU USED. SEE LINES 55-85 FOR A MODEL
+
+The test suite for PS resides in \text{test\textunderscore PS()} and allows for a wide variety of parametrization. A user may set the number of agents and the way their preferences are generated (via config), whether the output should be in fractional or decimal form, and how, if at all, to truncate the fractional values' denominators in their rational approximations.\\\\Speed testing confirms that our implementation is linear in the number of rounds and semiquadratic in the number of agents, i.e., $O(|N|^2r)$ for $r=$ number of rounds. We attribute this to the fact that for each round, for each agent, $O(|N|)$ items must be looked through to find the first available item. In a more performance-oriented setting, this could be cut down to $O(|N|r)$ by memoizing the last item eaten and doing a constant-time check to see if it is still available.\\\\Consider our test suite for PS:
+\begin{verbatim}
+def test_PS():
+    agents_list = sim.assign_preferences()
+    # run PS
+    ps_test = prob_serial(agents_list, output_fracs=False, limit_denom=100)
+    np.set_printoptions(threshold=1000, suppress=True)
+
+    # if lots of agents, print as sparse matrix using scipy
+    if (config.NUM_AGENTS > 10):
+        print "Probability Distribution Returned: \n" + str(csr_matrix(ps_test))
+    # otherwise, just print the prob dist!!
+    else:
+        print "Probability Distribution Returned: \n" + str(ps_test)
+
+    print "Item Morsels Remaining (should be 0): " + str(item_morsels)
+    # test to ensure that columns sum to 1
+    print "Column Sum (should be 1s): " + str([round(sum([row[i] for row in ps_test]), 5) for i in range(0, config.NUM_AGENTS)])
+    # test to ensure that rows sum to 1
+    print "Row Sum (should be 1s): " + str([round(sum(r), 5) for r in ps_test])
+
+\end{verbatim}
+\noindent with config above, that runs a test and outputs
+
+\begin{verbatim}
+Probability Distribution Returned: 
+[[0.2666, 0.3334, 0.0667, 0.0, 0.3333], [0.2667, 0.3333, 0.0666, 0.0, 0.3334],
+[0.2667, 0.3333, 0.0667, 0.0, 0.3333], [0.1, 0.0, 0.4, 0.5, 0.0], 
+[0.1, 0.0, 0.4, 0.5, 0.0]]
+Item Morsels Remaining (should be 0): [0, 0, 0, 0, 0]
+Column Sum (should be 1s): [1.0, 1.0, 1.0, 1.0, 1.0]
+Row Sum (should be 1s): [1.0, 1.0, 1.0, 1.0, 1.0]
+\end{verbatim}
+\noindent note that if desired, a fractional distribution such as 
+\begin{verbatim}
+[['1/4', '1/4', '1/8', '7/24', '1/12'], ['1/2', '0', '1/8', '7/24', '1/12'],
+['1/4', '1/4', '0', '5/12', '1/12'], ['0', '1/4', '3/8', '0', '3/8']]
+\end{verbatim}
+\noindent may be output with a simple change to the function call. However, some precision may be lost during the change to a rational approximation, implying that the doubly-stochastic property may not be evident in this output format.
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Conclusion}
 %%%%%%%%%%%%%%%%%%%%%
