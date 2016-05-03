@@ -141,7 +141,13 @@ Definition. Given a set of agents $a_0,\cdots,a_{n-1}$ with utility functions $u
 
 Our implementation in \texttt{metrics.py} follows the above chain of definitions quite closely. In the cardinal case, for each agent, we simply compute the utility resulted from  that agent's allocation and compare it to other agents' allocation. In the ordinal case, the \texttt{sort\textunderscore pref} function implements the sorted preference list, and \texttt{list\textunderscore sd} checks if the first list stochastically dominates the second list. Then we combine these two functions to implement ordinal envy-freeness. The two implementations are under the same umbrella function $\texttt{IsEnvyFree}$ where you can specify whether we want to check cardinal envy-freeness (type cardinal) or ordinal envy-freeness (type sd, which stands for stochastic dominance).
 
+The second criterion we consider is Pareto Optimality. Intuitively, Pareto optimality means you cannot make someone better off without making someone else worse off. 
 
+Definition. An allocation $\pi = (\pi_0,\dots,\pi_{n-1})$ to agents $0,1,\dots,n-1$ \textit{weakly Pareto dominates} another allocation $\pi' = (\pi'_0,\dots,\pi'_{n-1})$ if every agent $i$ weakly prefers $\pi_i$ over $\pi'_i$.
+
+Definition. An allocation $\pi$ is Pareto Optimal if it  weakly Pareto dominates every other allocation.
+
+Note that any allocation weakly Pareto dominates itself, so the ``every other allocation'' in the above definition can be replaced by ``every allocation''. If there is no randomness involved, such as in TTC or YRMH-IGYT, we can simply enumerate all $n!$ possible allocations and check if the given allocation Pareto dominates all of them. In fact, this is precisely how we implement $\texttt{IsParetoOptimal}$. The function returns $\texttt{True}$ if the given allocation is Pareto optimal, and returns a Pareto-dominating allocation if the given allocation is not Pareto optimal. 
 
 
 
