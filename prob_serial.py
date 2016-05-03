@@ -1,4 +1,5 @@
 import os
+import pprint
 import random
 from agent import Agent
 from distribution import Distribution
@@ -7,6 +8,7 @@ import numpy as np
 import logging
 import sim
 from fractions import Fraction
+from scipy.sparse import csr_matrix
 
 NUM_ROUNDS = 10000
 LIMIT_DENOMINATOR = 100
@@ -67,9 +69,20 @@ def prob_serial(agents, num_rounds=NUM_ROUNDS, output_fracs=False, limit_denom=L
                 amf.numerator) + "/" + str(amf.denominator)
     return agent_mat_fracs if output_fracs else agent_mat
 
-agents_list = sim.assign_preferences()
 
 # print agents_list
+def test_PS():
+    agents_list = sim.assign_preferences()
+    ps_test = prob_serial(agents_list, output_fracs=False, limit_denom=100)
+    np.set_printoptions(threshold=1000, suppress=True)
+    if (config.NUM_AGENTS > 10):
+        print "Probability Distribution Returned: \n" + str(csr_matrix(ps_test))
+    else:
+        print "Probability Distribution Returned: \n" + str(ps_test)
+    print "Item Morsels Remaining (should be 0): " + str(item_morsels)
+    # test to ensure that columns sum to 1
+    print "Column Sum (should be 1s): " + str([round(sum([row[i] for row in ps_test]), 5) for i in range(0, config.NUM_AGENTS)])
+    # test to ensure that rows sum to 1
+    print "Row Sum (should be 1s): " + str([round(sum(r), 5) for r in ps_test])
 
-# print prob_serial(agents_list, output_fracs=True, limit_denom=100)
-print [sum(r) for r in prob_serial(agents_list)]
+test_PS()
