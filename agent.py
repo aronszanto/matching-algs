@@ -13,5 +13,8 @@ class Agent:
         return (self.id == other.id and self.cardinal_prefs ==
                 other.cardinal_prefs and self.ordinal_prefs == other.ordinal_prefs)
 
+    def __repr__(self):
+        return "Agent%d (%d)" % (self.id, self.item)
+
     def __str__(self):
-        return str((self.id, self.item))
+        return self.__repr__()
