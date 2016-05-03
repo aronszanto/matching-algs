@@ -1,6 +1,5 @@
 \documentclass[12pt]{article}
-\usepackage{geometry}
-\geometry{letterpaper}
+\usepackage[letterpaper, portrait, margin=1in]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{relsize}
@@ -41,7 +40,7 @@
 \author{\studentname}
 
 \begin{document}
-%\maketitle
+\maketitle
 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Introduction}
@@ -121,6 +120,63 @@ The final algorithm we implement is the Probabilistic Serial mechanism, a specia
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Experimental Results}
 %% PUT TTC, YRM, EF, PO TEST OUTPUT HERE AND EXPLAIN THE CONFIGURATION THAT YOU USED. SEE LINES 55-85 FOR A MODEL
+TTC is tested in sim.py and outputs, for example:
+\begin{verbatim}
+initial agents (id item_owned ordinal_preferences)
+1 0 [4, 1, 2, 3, 0]
+3 1 [3, 1, 2, 4, 0]
+0 2 [4, 1, 3, 2, 0]
+2 3 [4, 1, 3, 2, 0]
+4 4 [3, 1, 2, 4, 0]
+TTC agents
+1 0 [4, 1, 2, 3, 0]
+3 1 [3, 1, 2, 4, 0]
+0 2 [4, 1, 3, 2, 0]
+2 4 [4, 1, 3, 2, 0]
+4 3 [3, 1, 2, 4, 0]
+\end{verbatim}
+Here, preferences are generated via the double-normal distribution.\\\\The testing for YRM is similar, except the number of houses assigned is less than the total number of agents.
+
+The test suite for PS resides in \text{test\textunderscore PS()} and allows for a wide variety of parametrization. A user may set the number of agents and the way their preferences are generated (via config), whether the output should be in fractional or decimal form, and how, if at all, to truncate the fractional values' denominators in their rational approximations.\\\\Speed testing confirms that our implementation is linear in the number of rounds and semiquadratic in the number of agents, i.e., $O(|N|^2r)$ for $r=$ number of rounds. We attribute this to the fact that for each round, for each agent, $O(|N|)$ items must be looked through to find the first available item. In a more performance-oriented setting, this could be cut down to $O(|N|r)$ by memoizing the last item eaten and doing a constant-time check to see if it is still available.\\\\Consider our test suite for PS: 
+\begin{verbatim} 
+def test_PS(): 
+    agents_list = sim.assign_preferences() 
+    # run PS 
+    ps_test = prob_serial(agents_list, output_fracs=False, limit_denom=100) 
+    np.set_printoptions(threshold=1000, suppress=True) 
+ 
+    # if lots of agents, print as sparse matrix using scipy 
+    if (config.NUM_AGENTS > 10): 
+        print "Probability Distribution Returned: \n" + str(csr_matrix(ps_test)) 
+    # otherwise, just print the prob dist!! 
+    else: 
+        print "Probability Distribution Returned: \n" + str(ps_test) 
+ 
+    print "Item Morsels Remaining (should be 0): " + str(item_morsels) 
+    # test to ensure that columns sum to 1 
+    print "Column Sum (should be 1s): " + str([round(sum([row[i] for row in ps_test]), 5) for i in range(0, config.NUM_AGENTS)]) 
+    # test to ensure that rows sum to 1 
+    print "Row Sum (should be 1s): " + str([round(sum(r), 5) for r in ps_test]) 
+ 
+\end{verbatim} 
+\noindent with config above, that runs a test and outputs 
+ 
+\begin{verbatim} 
+Probability Distribution Returned:  
+[[0.2666, 0.3334, 0.0667, 0.0, 0.3333], [0.2667, 0.3333, 0.0666, 0.0, 0.3334], 
+[0.2667, 0.3333, 0.0667, 0.0, 0.3333], [0.1, 0.0, 0.4, 0.5, 0.0],  
+[0.1, 0.0, 0.4, 0.5, 0.0]] 
+Item Morsels Remaining (should be 0): [0, 0, 0, 0, 0] 
+Column Sum (should be 1s): [1.0, 1.0, 1.0, 1.0, 1.0] 
+Row Sum (should be 1s): [1.0, 1.0, 1.0, 1.0, 1.0] 
+\end{verbatim} 
+\noindent note that if desired, a fractional distribution such as  
+\begin{verbatim} 
+[['1/4', '1/4', '1/8', '7/24', '1/12'], ['1/2', '0', '1/8', '7/24', '1/12'], 
+['1/4', '1/4', '0', '5/12', '1/12'], ['0', '1/4', '3/8', '0', '3/8']] 
+\end{verbatim} 
+\noindent may be output with a simple change to the function call. However, some precision may be lost during the change to a rational approximation, implying that the doubly-stochastic property may not be evident in this output format. 
+%%%%%%%%%%%%%%%%%%%%% 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Conclusion}
 %%%%%%%%%%%%%%%%%%%%%
