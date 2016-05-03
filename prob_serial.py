@@ -74,7 +74,7 @@ def prob_serial(agents, num_rounds=NUM_ROUNDS, output_fracs=False, limit_denom=L
 def test_PS():
     agents_list = sim.assign_preferences()
     # run PS
-    ps_test = prob_serial(agents_list, output_fracs=False, limit_denom=100)
+    ps_test = prob_serial(agents_list, output_fracs=True, limit_denom=100)
     np.set_printoptions(threshold=1000, suppress=True)
 
     # if lots of agents, print as sparse matrix using scipy
@@ -86,8 +86,9 @@ def test_PS():
 
     print "Item Morsels Remaining (should be 0): " + str(item_morsels)
     # test to ensure that columns sum to 1
-    print "Column Sum (should be 1s): " + str([round(sum([row[i] for row in ps_test]), 5) for i in range(0, config.NUM_AGENTS)])
+    # print "Column Sum (should be 1s): " + str([round(sum([row[i] for row in ps_test]), 5) for i in range(0, config.NUM_AGENTS)])
     # test to ensure that rows sum to 1
-    print "Row Sum (should be 1s): " + str([round(sum(r), 5) for r in ps_test])
+    # print "Row Sum (should be 1s): " + str([round(sum(r), 5) for r in
+    # ps_test])
 
 test_PS()
