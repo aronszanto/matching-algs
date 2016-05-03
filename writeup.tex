@@ -86,7 +86,7 @@ NUM_AGENTS = 100
 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Algorithms}
-%%TODO, JERRY TALK ABOUT THE IMPLEMENTATION OF TTC AND YRM AND HOW THEY DIFFER IN INPUT AND OUTPUT, see 91-92 for model
+%%TODO, JERRY TALK ABOUT THE IMPLEMENTATION OF TTC AND YRM AND HOW THEY DIFFER IN INPUT AND OUTPUT
 
 We first describe and implement Gale's celebrated \textit{Top Trading Cycles} algorithms. TTC is a canonical algorithm for the \textit{housing allocation with existing tenants} problem. More specifically, there are $n$ agents and $n$ items. Each agent has a strict preference over all the items. Every agent can own at most one item. Before the algorithm starts, every agent owns exactly one item. After the algorithm, every agent also owns exactly one item, which may or may not be the same item it started with. 
 
@@ -94,11 +94,23 @@ In English, the TTC algorithm proceeds as follows. In each round, each agent poi
 
 It is not immediately evident that the above verbal description of TTC provides a well-defined algorithm. Does it always terminate? Are the top-preference cycles well defined? To guarantee that, we need anxillary mathematical results. We can prove (for example, Lemma 12.1 in lecture 12) that the directed graph formed in each round of the TTC mechanism includes at least one cycle, and when multiple cycles form in a round they are vertex-disjoint. The existence of a cycle in each round guarantees that the algorithm terminates in at most $n$ steps, since a cycle means at least one agent is removed in that round, and there are $n$ agents. The vertex-disjoint property of the cycle means that in each round no agent is traded in more than one cycle, so the trade-around-the-cycle mechanism is well-defined. 
 
-We also use the above mathematical result to aid our implementation of TTC, which is in a file called \texttt{algos.py} We keep track of the remaining agents (not yet traded) in \texttt{agents\textunderscore remaining} and we repeat the round until all agents are traded, that is, \texttt{agents\textunderscore remaining} is empty. In each round, we first identify which agents are in a cycle and which are not. This is well-defined by the above result. The categorization begins by putting agents into three categories (variables in the implementation) \texttt{isCycle, isNotCycle, unknown}. At first, all agents are in unknown. Then, we pick an agent, say A0, from unknown, then we see what agent A0 points to (the agent that owns A0's most preferred item among the available ones), say A1, and so on. We keep track of
- the chain of agents in \texttt{cycle\textunderscore track}, adding one agent at a time. So, for example, \texttt{cycle\textunderscore track} is [A0, A1, A2]
-means A0 points to A1 and A1 points to A2. Each agent can point to one, and only one, agent among the available ones so this is well-defined. Since there are a finite number of agents, eventually the last agent will point to an agent that already exists in \texttt{cycle\textunderscore track}, say [A0, A1, A2] and A2 points to A1. We have found a cycle. The repeated agent until the end of \texttt{cycle\textunderscore track} is a cycle while all the agents before that are not in a cycle. We track this with\texttt{start\textunderscore index}. In the example above, A1 is  a repeated agent and appears in index 1, so \texttt{cycle\textunderscore track}, starting from index 1, that is, [A1, A2] is a cycle, and agents before index 1, that is, A0, is not a cycle. Then we remove all agents above from \texttt{unknown}. Repeat until \texttt{unknown} is empty, and all agents are correctly categorized in this round whether they are in a cycle or not. Then we perform trades on top-preference cycles and remove them from \texttt{agent\textunderscore remaining} while those in \texttt{isNotcycle} remain for the next round.
+We also use the above mathematical result to aid our implementation of TTC, which is in a file called \texttt{algos.py}. We keep track of the remaining agents (not yet traded) in \texttt{agents\textunderscore remaining} and we repeat the round until all agents are traded, that is, \texttt{agents\textunderscore remaining} is empty. In each round, we first identify which agents are in a cycle and which are not. This is well-defined by the above result. The categorization begins by putting agents into three categories (variables in the implementation) \texttt{isCycle, isNotCycle, unknown}. At first, all agents are in unknown. Then, we pick an agent, say A0, from unknown, then we see what agent A0 points to (the agent that owns A0's most preferred item among the available ones), say A1, and so on. We keep track of the chain of agents in \texttt{cycle\textunderscore track}, adding one agent at a time. So, for example, \texttt{cycle\textunderscore track} is [A0, A1, A2] means A0 points to A1 and A1 points to A2. Each agent can point to one, and only one, agent among the available ones so this is well-defined. Since there are a finite number of agents, eventually the last agent will point to an agent that already exists in \texttt{cycle\textunderscore track}, say [A0, A1, A2] and A2 points to A1. We have found a cycle. The repeated agent until the end of \texttt{cycle\textunderscore track} is a cycle while all the agents before that are not in a cycle. We track this with\texttt{start\textunderscore index}. In the example above, A1 is  a repeated agent and appears in index 1, so \texttt{cycle\textunderscore track}, starting from index 1, that is, [A1, A2] is a cycle, and agents before index 1, that is, A0, is not a cycle. Then we remove all agents above from \texttt{unknown}. Repeat until \texttt{unknown} is empty, and all agents are correctly categorized in this round whether they are in a cycle or not. Then we perform trades on top-preference cycles and remove them from \texttt{agent\textunderscore remaining} while those in \texttt{isNotcycle} remain for the next round.
 
-%We need algorithm to satisfy the \textit{participation} condition: every agent, at the end of the algorithm, should own a house that is at least as preferable to her as the house she started with. Otherwise, the agent is incentivized to not participate in the mechanism. 
+The second algorithm we consider is \textsc{You Request My House-I Get Your Turn} or \textsc{YRMH-IGYT} mechanism. This algorithm, like TTC, also deals with the house allocation with existing tenants problem, but we relax the condition that every agent owns an item at the beginning. YRMH-IGYT permits some agents, but not necessarily all, to own one item at the beginning of the algorithm. The case where all agents own an item at the beginning, and no agents own an item at the beginning, are both permissible limit cases.
+
+First we define a priority list $f$ of agents. Then, assign the agent ordered first in $f$ to her most preferred house; assign the agent ordered second in $f$ to her most preferred house among remaining ones; and so on, until an agent requests the occupied house of
+an existing tenant. If at that point the existing tenant whose occupied house is requested
+has already been assigned a house, do not disturb the procedure. Otherwise, update the remainder of the priority-order by inserting that existing tenant to the top and proceed.
+
+If at any point a loop forms, it is formed exclusively by a subset of existing tenants who
+request the occupied houses of one another. In such cases remove all agents in the loop
+by assigning them the houses they request and proceed.
+
+[I copy the above description verbatim from a paper called "Fair and Efficient Discrete Resource Allocation: A Market Approach" by Ozgun Ekici]
+
+The version we implemented here does not a priori define the priority list $f$. Rather, $f$ is a random permutation of all agents, where each permutation is equally likely. Some sources call this a Randomized You Request My House-I Get Your Turn or RYRMH-IGYT. The non-random YRMH-IGYT suffers from the fairness problem: the agents earlier in the priority list is clearly favored over the agents later in the priority list. To solve this problem, we make the priority list random.
+
+Our implementation of RYRMH-IGYT goes as follows. \texttt{priority\textunderscore list} is a random permutation of all agents. In each turn, the active agent \texttt{curr\textunderscore agent} is the first agent in the priority list. It requests an item \texttt{requested\textunderscore item} (which cannot be None) owned by \texttt{requested\textunderscore item\textunderscore owner} (which may be None). If there is no owner, then per the algorithm, we assign the requested item to current agent, remove the agent from the priority list (because the assignment is final) and we are done for this round. If the item has an owner, then the owner \texttt{requested\textunderscore item\textunderscore owner} is moved to the front of the priority list. We keep track of all unsuccessful requests in \texttt{request\textunderscore loop}. If a successful request (i.e. the requested item has no owner), then we clear \texttt{request\textunderscore loop}. Every time an unsuccessful request happens, we check whenever there is a new unsuccessful request whether there is a loop or not using the index technique similar to what we did in TTC (the index variable here is \texttt{loop\textunderscore start \textunderscore index}). If there is a loop, we perform a trade on the cycle and clear \texttt{request\textunderscore loop}. Since there is a finite number of agents, eventually either a successful request happens, or unsuccessful requests pile up in \texttt{request\textunderscore loop} until a loop occurs, so the algorithm always terminate.
 
 The final algorithm we implement is the Probabilistic Serial mechanism, a special case of the group of algorithms known as "Eating Algorithms", a name that fits very nicely! The algorithm involves a unit block of time, where at each $t \in [0, 1]$, each agent is "consuming" some probability of acquiring some item, where the item they are each eating is their top-rated, available (i.e., not totally consumed) item.\\\\In our implementation\footnote{NB: For the remainder of the section, we will call the reader's attention to various line numbers in the file \text{prob\textunderscore serial.py}.}, we model continuous time as arbitrarily resolute time-slices, and we denote each slice as a \emph{round}.
 \\\\Each item has a corresponding number of "morsels" that it has left (line 15): this denotes implicitly the fraction of the item's probability that is "left". In each round, an agent takes one bite out of the item that they most prefer of the set of items reminding, i.e., they acquire one morsel of the item that they are most partial towards, from all the items that still have morsels. In each iteration, the order of agents is shuffled (line 52; so as to eliminate the possibility of a corner case wherein there are several instances when each of $n$ agents wants to eat the same item, with fewer than $n$ morsels remaining, benefiting the first few agents in the order). At the end, the probability distribution is output (line 82; 85) in either fractional or decimal form, and we check that the resulting matrix (rows of houses, columns of agents) is doubly stochastic, i.e., all the rows and all the columns sum to 1. This is the expected behavior, because assuming well-defined preferences over every item, and that each agent owns a house to begin with, the probability that an agent gets no house should be 0, and the probability that a particular house is not allocated should be 0. (To see output for PS, run the procedure \emph{test\textunderscore ps()} from the file.)\\\\We note that moving from this probability matrix to an allocation is a trivial matter of flipping a biased coin and allocating each house sequentially, and is not implemented in our project, as most outputs of PS that we've seen in the literature is the doubly-stochastic matrix rather than an outcome drawn from that distribution.
@@ -109,46 +121,6 @@ The final algorithm we implement is the Probabilistic Serial mechanism, a specia
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Experimental Results}
 %% PUT TTC, YRM, EF, PO TEST OUTPUT HERE AND EXPLAIN THE CONFIGURATION THAT YOU USED. SEE LINES 55-85 FOR A MODEL
-
-The test suite for PS resides in \text{test\textunderscore PS()} and allows for a wide variety of parametrization. A user may set the number of agents and the way their preferences are generated (via config), whether the output should be in fractional or decimal form, and how, if at all, to truncate the fractional values' denominators in their rational approximations.\\\\Speed testing confirms that our implementation is linear in the number of rounds and semiquadratic in the number of agents, i.e., $O(|N|^2r)$ for $r=$ number of rounds. We attribute this to the fact that for each round, for each agent, $O(|N|)$ items must be looked through to find the first available item. In a more performance-oriented setting, this could be cut down to $O(|N|r)$ by memoizing the last item eaten and doing a constant-time check to see if it is still available.\\\\Consider our test suite for PS:
-\begin{verbatim}
-def test_PS():
-    agents_list = sim.assign_preferences()
-    # run PS
-    ps_test = prob_serial(agents_list, output_fracs=False, limit_denom=100)
-    np.set_printoptions(threshold=1000, suppress=True)
-
-    # if lots of agents, print as sparse matrix using scipy
-    if (config.NUM_AGENTS > 10):
-        print "Probability Distribution Returned: \n" + str(csr_matrix(ps_test))
-    # otherwise, just print the prob dist!!
-    else:
-        print "Probability Distribution Returned: \n" + str(ps_test)
-
-    print "Item Morsels Remaining (should be 0): " + str(item_morsels)
-    # test to ensure that columns sum to 1
-    print "Column Sum (should be 1s): " + str([round(sum([row[i] for row in ps_test]), 5) for i in range(0, config.NUM_AGENTS)])
-    # test to ensure that rows sum to 1
-    print "Row Sum (should be 1s): " + str([round(sum(r), 5) for r in ps_test])
-
-\end{verbatim}
-\noindent with config above, that runs a test and outputs
-
-\begin{verbatim}
-Probability Distribution Returned: 
-[[0.2666, 0.3334, 0.0667, 0.0, 0.3333], [0.2667, 0.3333, 0.0666, 0.0, 0.3334],
-[0.2667, 0.3333, 0.0667, 0.0, 0.3333], [0.1, 0.0, 0.4, 0.5, 0.0], 
-[0.1, 0.0, 0.4, 0.5, 0.0]]
-Item Morsels Remaining (should be 0): [0, 0, 0, 0, 0]
-Column Sum (should be 1s): [1.0, 1.0, 1.0, 1.0, 1.0]
-Row Sum (should be 1s): [1.0, 1.0, 1.0, 1.0, 1.0]
-\end{verbatim}
-\noindent note that if desired, a fractional distribution such as 
-\begin{verbatim}
-[['1/4', '1/4', '1/8', '7/24', '1/12'], ['1/2', '0', '1/8', '7/24', '1/12'],
-['1/4', '1/4', '0', '5/12', '1/12'], ['0', '1/4', '3/8', '0', '3/8']]
-\end{verbatim}
-\noindent may be output with a simple change to the function call. However, some precision may be lost during the change to a rational approximation, implying that the doubly-stochastic property may not be evident in this output format.
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Conclusion}
 %%%%%%%%%%%%%%%%%%%%%
