@@ -6,10 +6,10 @@ import config
 import numpy as np
 import logging
 
-from algos import TTC
+import algos
 
 
-def assign_preferences(n=config.NUM_AGENTS):
+def assign_preferences(n=config.NUM_AGENTS,num_items_assigned=config.NUM_AGENTS):
 
     # create means
     item_means = [Distribution(config.ITEM_MEAN, config.ITEM_VAR).sample()
@@ -40,7 +40,7 @@ def assign_preferences(n=config.NUM_AGENTS):
     logging.debug(agents[0].ordinal_prefs)
 
     # for TTC, every agent owns a house a priori
-    for i in xrange(n):
+    for i in xrange(num_items_assigned):
         agents[i].item = i
 
     return agents
@@ -51,29 +51,17 @@ def main():
     logging.basicConfig(filename='matching.log',
                         filemode='w', level=logging.DEBUG)
 
-    # agents = assign_preferences()
+    algos.test_TTC()
+    algos.test_YRMH()
 
-    # hard-code, for debugging
-    agents = assign_preferences()
-    # [Agent(id=3, item=0, ordinal_prefs=[0, 2, 3, 1]),
-    #           Agent(id=1, item=1, ordinal_prefs=[0, 3, 2, 1]),
-    #           Agent(id=2, item=2, ordinal_prefs=[0, 3, 1, 2]),
-    #           Agent(id=0, item=3, ordinal_prefs=[0, 3, 1, 2])
-    #           ]
 
-    print "initial agents"
-    logging.debug("INITIAL AGENTS")
-    for agent in agents:
-        print agent.id, agent.item, agent.ordinal_prefs
-        logging.debug("agent.id, agent.item, agent.ordinal_prefs: " +
-                      str((agent.id, agent.item, agent.ordinal_prefs)))
 
-    print "TTC agents"
-    logging.debug("TTC AGENTS")
-    for agent in TTC(agents):
-        print agent.id, agent.item, agent.ordinal_prefs
-        logging.debug("agent.id, agent.item, agent.ordinal_prefs: " +
-                      str((agent.id, agent.item, agent.ordinal_prefs)))
 
 if __name__ == "__main__":
     main()
+
+
+    # agents = assign_preferences(num_item_assigned=config.NUM_AGENTS/3)
+    # for agent in agents:
+    #     print agent.id, agent.item, agent.ordinal_prefs
+
