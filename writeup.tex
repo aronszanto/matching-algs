@@ -25,8 +25,8 @@
 
 \newcommand{\noin}{\noindent}
 
-\newcommand{\studentname}{Aron Szanto}
-\newcommand{\exerciseset}{Assignment 7}
+\newcommand{\studentname}{Aron Szanto & Jerry Anunrojwong}
+\newcommand{\exerciseset}{Final Project}
 
 \fancypagestyle{plain}{}
 \pagestyle{fancy}
@@ -37,42 +37,26 @@
 
 \graphicspath{{figures/}}
 
-\title{CS 124 \exerciseset}
+\title{CS 136 \exerciseset}
 \author{\studentname}
 
 \begin{document}
 \maketitle
-Collaborated with Joe Kahn
 %%%%%%%%%%%%%%%%%%%%%
-\section*{Question 1}
-In the first part of the problem, we consider the number of independent sets in an undirected line graph with $n$ vertices. We define $T(n)$ as the number of independent sets in such a graph. Considering the first $n-1$ vertices and holding the last one "hostage", we consider the two disjoint sets of independent sets we can create. The first is the set of independent sets we create with the first $n-1$ edges. The second is the set formed by injecting the last element into each of the independent sets formed by the first $n-2$ elements, so that there are no mutual edges between this set and the first set. More formally, let $S(n)$ represent the set of independent sets of vertices in an $n$-vertex line graph, and let $\tilde{n}$ be the last vertex in the line graph. Then 
-$$S(n) = S(n-1) \quad 
-\cup \bigcup_{s \in S(n-2)} s \cup \{\tilde{n}\}$$
-It follows that
-$$\left\vert{S(n)}\right\vert = T(n) = T(n-1) + T(n-2), T(0) = 1, T(1) = 2$$
-With the last following from the empty set $\emptyset$ being the only member of $T(0)$ and one of two members in $T(1)$. More succinctly, we have
-$$T(n) = F_{n+2}$$
-where $F_n$ is the $n$th Fibonacci number.\\\\
-
-In the next section, we consider cycle graphs. In a similar analysis, we remove an arbitrary node and consider the sets we can construct with and without it. In particular, if we don't include it, then we have reduced the problem to that of finding independent sets in a line graph with $n-1$ nodes, i.e., $T(n-1)$. Alternatively, if we do include the node we're considering, then we can't use either node on each side of it. By similar logic, this can be shown to be equivalent to the sets constructed by injecting the last node into the sets that can be formed using the other $n-3$ vertices. So we have defined $C(n)$ the number of sets created with a cycle graph of $n$ vertices as 
-$$C(n) = T(n-1) + T(n-3) = F_{n+1} + F_{n-1}$$
-In the case of complete binary trees, we define $B(n)$ to be the number of independent sets possible in a complete binary tree of height $n$. We conceptualize this problem thus: starting at the root, we consider including or excluding it. If we exclude it, then we can form any combination of the sets created by starting from each of the root's children, i.e., $B(n-1)$ for each child. By the multiplication rule, this quantity is squared since the sets are independent. If we include the root, the same analysis follows, but removed one level: rather than squaring the $n-1$th level's sets, since we can't include that level due to the edges those children share with the root, we drop down to the $n-2$th level. In particular, we find that $$B(n) = B(n-1)^2 + B(n-2)^4, B(0) = 1, B(1) = 2$$
-For a tree with 127 nodes, we find that $n = 7$ and that $$B(7) = 13345346031444632841427643906$$
+\section*{Introduction}
 %%%%%%%%%%%%%%%%%%%%%
-\section*{Question 2}
-We generalize the random algorithm thus: For each vertex, assign it a random number that will denote its set, from 1 to $k$. The probability that a single edge will cross the cut is the probability that it does not have terminal vertices in the same set, i.e., $1-\frac{1}{k}$. By linearity of expectation, the total number of edges that cross the cut is $(1-\frac{1}{k})E$, which is within a factor of $1-\frac{1}{k}$ of the optimal $E$ (if every edge crosses the cut). As a sanity check, one can easily see that if $k=2$, this gives us the 2-approximation we're familiar with from lecture. The runtime is linear in the number of vertices!\\\\
-We generalize the local search algorithm: 1. Assign a random set to each vertex. 2. While there is a vertex contributing $c$ edges across the cut that could contribute more than $c$ if it were in a different set, assign it that set. 3. When there is no such switch that can be made profitably, terminate.\\ I argue that the performance guarantee is within $1-\frac{1}{k}$ of the optimal. When the program terminates, we know that no vertex can be switched to facilitate a greater number of edges crossing the cut. Let $e_{ii}$ denote the number of edges between vertices in set $i$, and $e_{ij}$ be the number between $i$ and $j$. As in class, we know that $2e_{ii} < e_{ij} \forall_{i \neq j}$. Since our algorithm stops, we know that $(k-1) \sum_i^k e_{ii}$ is at most the algorithmic approximation (we exclude the set $i$ since those edges don't count in our calculation, hence $k-1$). Let $A$ be the algorithmic approximation. Rearranging terms, we have that the optimal number $E \leq \sum_i^k e_{ii} + A$. Finally, we substitute to find
-$E \leq A (1-\frac{1}{k})$. This is the general form of what we found in class with $k=2$! The runtime is $O(VE)$, since we increase the number of edges crossing the cut by at least one each time we make a switch, and we iterate through each vertex in the worst case after making one switch. 
-%%%%%%%%%%%%%%%%%%%%%
-\section*{Question 3}
-We construct $G'$ as advised, noting that an existing edge in $G$ corresponds to a vertex in $G'$, treating vertices in $G$ as having self-loops. Claim 1: if there exists a clique with cardinality $k$ in $G$, there exists a clique with cardinality $k^2$ in $G'$.\\
-Proof: For each edge in the clique in $G$, there exist two vertices in $G'$ by the definition of $G'$, as an edge $(i,j)$ will correspond to vertices $(i,j)$ and $(j,i)$ in $G'$. In addition, each vertex $v$ in $G$ corresponds to a vertex $(v,v)$ in $G'$. Thus, for each clique with size $k$ in $G$, there are $\frac{k(k-1)}{2}$ edges in that clique. In $G'$, there are thus $2 \cdot \frac{k(k-1)}{2} + k = k^2$ vertices corresponding to the clique. Because edges correspond do edges that exist in $G$, these are all connected, forming a clique of cardinality $k^2$.\\
-Thus, if we have a polynomial time algorithm for a 2-approximation for a clique, we now have a $\sqrt{2}$-approximation by creating $G'$. Extending this argument, we can iterate the creation of $G'$ arbitrarily to be within a factor of $2^{\frac{1}{2^n}}$ To figure out how many times to iterate $x$, we solve $$1+\epsilon = 2^{\frac{1}{2^x}}$$ to get $$x = -\log_2 \log_2(1+\epsilon)$$
-If our polynomial approximation on input size $n$ ran in $O(n^c)$ time, our $1-\epsilon$ approximation runs in $O(n^{\sigma^c})$ time, where $\sigma = 2^{-\log_2 \log_2(1+\epsilon)}$, which is still polynomial, though the degree grows quickly when $\epsilon$ is small.
+\section*{Preferences}
 
 %%%%%%%%%%%%%%%%%%%%%
-\section*{Question 4}
-Suppose $A$ is the total time on machine 1 and $B$ is the total time on machine 2. Optimally, our load is $O = \frac{A+B}{2}$ on each machine. For contradiction, assume we don't get within 4/3 when the algorithm halts. Then, WLOG, allowing $A$ to be the machine with the longer runtime, $$A > \frac{4}{3} (\frac{A+B} {2})$$, which gives $$A > 2B$$. We break this analysis into cases, where $A$ is composed of one or multiple jobs. In the case that $A$ has just one job, this is an optimal allocation, but now we have that $A=O$ and $A > \frac{4}{3} O$, a contradition. If $A$ is composed of multiple jobs, then we argue that at least one job on machine 1 has a running time $\leq \frac{A}{2}$. This is trivially proven, as it is impossible for all in a sequence of numbers summing to $n$ to greater than half of $n$. Further, since job $j_i < \frac{A}{2}$ is on the machine, we are able to decrease the makespan by moving it over, since $A-j_i < A$ and $B + j_i < A$ since $j_i \leq \frac{A}{2}$ and $2B < A$. Thus, we have a contradiction, because our algorithm shouldn't have terminated. Thus, our algorithm always finds an approximation within $\frac{4}{3}$ of the optimal.
+\section*{Algorithms}
+
+%%%%%%%%%%%%%%%%%%%%%
+\section*{Metrics}
+%%%%%%%%%%%%%%%%%%%%%
+\section*{Experimental Results}
+
+%%%%%%%%%%%%%%%%%%%%%
+\section*{Metrics}
 %%%%%%%%%%%%%%%%%%%%%
 
 \end{document}
