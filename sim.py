@@ -14,7 +14,6 @@ def assign_preferences(n=config.NUM_AGENTS):
     # create means
     item_means = [Distribution(config.ITEM_MEAN, config.ITEM_VAR).sample()
                   for _ in xrange(n)]
-    logging.debug("Item means: " + str(item_means))
 
     # create agents and shuffle their order
     agents = [Agent(i) for i in xrange(n)]
@@ -28,8 +27,9 @@ def assign_preferences(n=config.NUM_AGENTS):
 
     logging.debug("Cardinal Prefs: " + str(agents[0].cardinal_prefs))
 
-    logging.debug("correlation between means and preferences is " +
-                  str(np.corrcoef(item_means, agents[0].cardinal_prefs)[0, 1]))
+    logging.debug("correlation between sample preferences is " +
+                  str(np.corrcoef(agents[1].cardinal_prefs,
+                                  agents[0].cardinal_prefs)[0, 1]))
 
     # sort agents' preferences
     for agent in agents:
@@ -47,7 +47,7 @@ def assign_preferences(n=config.NUM_AGENTS):
 
 
 def main():
-
+    assign_preferences()
     logging.basicConfig(filename='matching.log',
                         filemode='w', level=logging.DEBUG)
 
