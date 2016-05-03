@@ -73,12 +73,17 @@ def prob_serial(agents, num_rounds=NUM_ROUNDS, output_fracs=False, limit_denom=L
 # print agents_list
 def test_PS():
     agents_list = sim.assign_preferences()
+    # run PS
     ps_test = prob_serial(agents_list, output_fracs=False, limit_denom=100)
     np.set_printoptions(threshold=1000, suppress=True)
+
+    # if lots of agents, print as sparse matrix using scipy
     if (config.NUM_AGENTS > 10):
         print "Probability Distribution Returned: \n" + str(csr_matrix(ps_test))
+    # otherwise, just print the prob dist!!
     else:
         print "Probability Distribution Returned: \n" + str(ps_test)
+
     print "Item Morsels Remaining (should be 0): " + str(item_morsels)
     # test to ensure that columns sum to 1
     print "Column Sum (should be 1s): " + str([round(sum([row[i] for row in ps_test]), 5) for i in range(0, config.NUM_AGENTS)])
