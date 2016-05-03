@@ -114,8 +114,11 @@ def IsParetoOptimal(agents, items):
             curr_pref = curr_agent.ordinal_prefs
             new_item = assignment[i]
             # if worse off = curr_item has higher index = lower priority
-            if curr_pref.index(curr_item) > curr_pref.index(new_item):
+            count = 0
+            if curr_pref.index(curr_item) >= curr_pref.index(new_item):
                 # returns the Pareto-dominating assignment
+                count = count + 1
+            if count == len(items):
                 return assignment
 
         # if you pass the above for loop, assignment doesn't Pareto dominate the current
