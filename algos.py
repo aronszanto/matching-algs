@@ -240,7 +240,7 @@ def YRMH_IGYT(agents, items):
 
             # logging.debug("requested_item_owner is None")
             # logging.debug("FINAL ASSIGN AGENT " +
-            #               str(curr_agent.id) + " TO ITEM " + str(requested_item))
+            # str(curr_agent.id) + " TO ITEM " + str(requested_item))
 
             # curr_agent gives up its current item to get the requested one; assignment finalized
             # curr_agent.item = requested_item -- actually this is not necessary
@@ -317,7 +317,7 @@ def test_TTC():
     agents = assign_preferences()
 
     print "Input agents"
-    
+
     for agent in agents:
         print "Agent " + str(agent.id) + " owns item " + str(agent.item) + " and has ordinal pref " + str(agent.ordinal_prefs)
 
@@ -329,13 +329,14 @@ def test_TTC():
     print "Is TTC Pareto Optimal? If yes, says True. If no, returns a Pareto-dominating allocation"
     print IsParetoOptimal(ttc_agents, range(len(ttc_agents)))
 
+
 def test_YRMH():
 
     print "-------------------- YRMH-IGYT TESTING --------------------"
-    agents = assign_preferences(num_items_assigned=config.NUM_AGENTS/2)
+    agents = assign_preferences(num_items_assigned=config.NUM_AGENTS / 2)
 
     print "Input agents"
-    
+
     for agent in agents:
         print "Agent " + str(agent.id) + " owns item " + str(agent.item) + " and has ordinal pref " + str(agent.ordinal_prefs)
 
@@ -346,4 +347,3 @@ def test_YRMH():
 
     print "Is YRMH-IGYT Pareto Optimal? If yes, says True. If no, returns a Pareto-dominating allocation"
     print IsParetoOptimal(yrmh_agents, range(len(yrmh_agents)))
-

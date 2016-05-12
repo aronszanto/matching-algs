@@ -5,11 +5,10 @@ from distribution import Distribution
 import config
 import numpy as np
 import logging
-
 import algos
 
 
-def assign_preferences(n=config.NUM_AGENTS,num_items_assigned=config.NUM_AGENTS):
+def assign_preferences(n=config.NUM_AGENTS, num_items_assigned=config.NUM_AGENTS):
 
     # create means
     item_means = [Distribution(config.ITEM_MEAN, config.ITEM_VAR).sample()
@@ -55,13 +54,9 @@ def main():
     algos.test_YRMH()
 
 
-
-
 if __name__ == "__main__":
     main()
-
 
     # agents = assign_preferences(num_item_assigned=config.NUM_AGENTS/3)
     # for agent in agents:
     #     print agent.id, agent.item, agent.ordinal_prefs
-

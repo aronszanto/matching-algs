@@ -1,5 +1,5 @@
 \documentclass[12pt]{article}
-\usepackage[letterpaper, portrait, margin=1in]{geometry}
+\usepackage[letterpaper, portrait, margin=.9in]{geometry}
 \usepackage{graphicx}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{relsize}
@@ -24,55 +24,55 @@
 
 \newcommand{\noin}{\noindent}
 
-\newcommand{\studentname}{Aron Szanto & Jerry Anunrojwong}
+\newcommand{\studentname}{Aron Szanto and Jerry Anunrojwong}
 \newcommand{\exerciseset}{Final Project}
-
+ 
 \fancypagestyle{plain}{}
 \pagestyle{fancy}
 \fancyhf{}
 \fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
-
+ 
 \graphicspath{{figures/}}
-
+ 
 \title{CS 136 \exerciseset}
 \author{\studentname}
-
+ 
 \begin{document}
 \maketitle
-
+ 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Introduction}
 In this project, we consider the housing market problem from a variety of perspectives, both theoretical and practical. In the simplest formulation of this classic problem, a set $N$ of agents owns a set $H$ of houses, and the goal is to find a matching that is Pareto-optimal. Roughly speaking, this implies that under the matching scheme, there is no deviation benefiting an agent $i$ that would not decrease the utility of an agent $j \neq i$, for all $i$ and $j$.\\\\
-The problem becomes more interesting when a certain amount of leeway is granted with respect to the parameters of possible solutions. By opening the door to probabilistic algorithms, tweaks to the initial ownership schema, and permutations of preference generation, some very interesting results can be derived, especially when the metrics used to discuss solutions are broadened beyond simple Pareto-optimality.\\\\For our project, we were interested in programming three of the most important algorithms associated with the house allocation problem, in addition to developing software to analyze the efficiency and quality of the solutions output. In particular, we created programs in the python language to model the Top Trading Cycles, You Request My House I Get Your Turn, and Probabilistic Serial algorithms, hereafter referred to simply by their (perhaps truncated) initials (TTC, YRM, PS, respectively). In addition, we analyzed the solutions returned by these procedures via metrics including ex-post Pareto-optimality, time complexity (performance speed), and envy-freeness. Last, we played with preference generation, considering the Mallow model but settling on a scheme relying upon cardinal utilities modeled from a hierarchical normal distribution, guaranteeing correlated preferences. While our writeup will highlight our findings and showcase the most important pieces of our project, we stress that the brunt of the effort expended on this collaboration went into an extensive implementation of the several algorithms and solution metrics, the entirety of which is included with this paper. At certain points in the paper, we will direct the reader to run the scripts associated with certain files if so desired, to see results firsthand. In addition, we will often provide sample output within the text so as to avoid extensive context-switching.\\\\In the first section, we will discuss the preference generation techniques utilized to parametrize our agents' utilities. Next, we will give an overview of the algorithms that we coded. Following that, we detail the metrics used to analyze the quality of the solutions we generate. We then move to our experimental results, showing sample inputs and outputs to our algorithms. Ultimately, we discuss the challenges we faced and address some of the reasoning behind our design decisions in our conclusion.
+The problem becomes more interesting when a certain amount of leeway is granted with respect to the parameters of possible solutions. By opening the door to probabilistic algorithms, tweaks to the initial ownership schema, and permutations of preference generation, some very interesting results can be derived, especially when the metrics used to discuss solutions are broadened beyond simple Pareto-optimality.\\\\For our project, we were interested in programming three of the most important algorithms associated with the house allocation problem, in addition to developing software to analyze the efficiency and quality of the solutions output. In particular, we created programs in the python language to model the Top Trading Cycles, You Request My House I Get Your Turn, and Probabilistic Serial algorithms, hereafter referred to simply by their (perhaps truncated) initials (TTC, YRM, PS, respectively). In addition, we analyzed the solutions returned by these procedures via metrics including ex-post Pareto-optimality, time complexity (performance speed), and envy-freeness. Last, we played with preference generation, considering the Mallow model but settling on a scheme relying upon cardinal utilities modeled from a hierarchical normal distribution, guaranteeing correlated preferences. While our write-up will highlight our findings and showcase the most important pieces of our project, we stress that the brunt of the effort expended on this collaboration went into an extensive implementation of the several algorithms and solution metrics, the entirety of which is included with this paper. At certain points in the paper, we will direct the reader to run the scripts associated with certain files if so desired, to see results firsthand. In addition, we will often provide sample output within the text so as to avoid extensive context-switching.\\\\In the first section, we will discuss the preference generation techniques utilized to parameterize our agents' utilities. Next, we will give an overview of the algorithms that we coded. Following that, we detail the metrics used to analyze the quality of the solutions we generate. We then move to our experimental results, showing sample inputs and outputs to our algorithms. Ultimately, we discuss the challenges we faced and address some of the reasoning behind our design decisions in our conclusion.
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Preferences}
 At the heart of all matching problems is a preference scheme that dictates each agent's preferences. In particular, a preference system must be able to determine, given two alternatives, which, if either, is preferred. In this instance, we model pairwise preference as a cardinal comparison between the utilities afforded to an agent by the two alternatives proposed. More formally, an agent $i$'s utility over alternative $a$ in set $A$ is given by a function $u_i: A \rightarrow {\Bbb R}$, and an operator such as $\succ$ is defined (loosely) by the equivalence $u_i(a_1) > u_i(a_2) \equiv a_1 \succ_i a_2$. In relation to our problem, the preference operator denotes that an agent prefers the assignment of a particular house (or other item, though housing is the canonical example in the literature) to that of another.\\\\
-Thus, the way in which we model preferences inherently dictates the scope, direction, and results of our simulation. One option we explored early on (at the suggestion of Debmalya Mandal) was the Mallow model, a way of generating ordinal (and thus pairwise) preferences across a set of alternatives, clasically parametrized by a dispersion factor $\phi$ that relates the "closeness" of agents' preferences. In other words, dispersion is the degree to which there is an underlying "true" quality assessment that each agent tends to agree with. However, we decided against this model because preferences in the real world are poorly modeled by way of randomly selecting alternatives to be better than others, even if there is a system to the randomness. Under the Mallow model, there is no way to control the degree to which a house is more inherently desireable than another. However, a system of two-tiered normally distributed preferences allows a great deal of control over both the underlying quality distribution of houses as well as the degree to which agents' preferences take into account this distribution.\\\\We model preferences as follows. Build a vector $V \in {\Bbb R^{|N|}}$ by sampling from a normal distribution with mean $\mu$ and variance $\sigma^2$. For each $v_i$ in $V$, create a normal distribution with mean $v_i$ and variance $\eta^2$. For each agent, sample their utility for assignment of house $i$ from the secondary distribution. In this way, one can fine-tune the way preferences correlate between agents. On one side, increasing $\sigma$ spreads out the underlying qualities of the houses, making preferences more distinct, and thus less independent. On the other, increasing $\eta$ makes differences in underlying quality less significant in determining pairwise preferences. Providing a snippet:
+Thus, the way in which we model preferences inherently dictates the scope, direction, and results of our simulation. One option we explored early on (at the suggestion of Debmalya Mandal) was the Mallow model, a way of generating ordinal (and thus pairwise) preferences across a set of alternatives, classically parameterized by a dispersion factor $\phi$ that relates the "closeness" of agents' preferences. In other words, dispersion is the degree to which there is an underlying "true" quality assessment that each agent tends to agree with. However, we decided against this model because preferences in the real world are poorly modeled by way of randomly selecting alternatives to be better than others, even if there is a system to the randomness. Under the Mallow model, there is no way to control the degree to which a house is more inherently desirable than another. However, a system of two-tiered normally-distributed preferences allows a great deal of control over both the underlying quality distribution of houses as well as the degree to which agents' preferences take into account this distribution.\\\\We model preferences as follows. Build a vector $V \in {\Bbb R^{|N|}}$ by sampling from a normal distribution with mean $\mu$ and variance $\sigma^2$. For each $v_i$ in $V$, create a normal distribution with mean $v_i$ and variance $\eta^2$. For each agent, sample their utility for assignment of house $i$ from the secondary distribution. In this way, one can fine-tune the way preferences correlate between agents. On one side, increasing $\sigma$ spreads out the underlying qualities of the houses, making preferences more distinct, and thus less independent. On the other, increasing $\eta$ makes differences in underlying quality less significant in determining pairwise preferences. Providing a snippet:
 \begin{verbatim}
 def assign_preferences(n=config.NUM_AGENTS):
-
+ 
     # create means
     item_means = [Distribution(config.ITEM_MEAN, config.ITEM_VAR).sample()
                   for _ in xrange(n)]
-
+ 
     # create agents and shuffle their order
     agents = [Agent(i) for i in xrange(n)]
     random.shuffle(agents)
-
+ 
     # assign agents preferences
-
+ 
     for agent in agents:
         agent.cardinal_prefs = [Distribution(
             item_mean, config.PREFERENCE_VAR).sample() for item_mean in item_means]
-
+ 
     # sort agents' preferences
     for agent in agents:
         agent.ordinal_prefs = [sorted(agent.cardinal_prefs).index(x)
                                for x in agent.cardinal_prefs]
 \end{verbatim}
-
+ 
 \noindent When run with standard configuration
 \begin{verbatim}
 ITEM_VAR = 63 # sigma^2
@@ -81,39 +81,39 @@ PREFERENCE_VAR = 44.7 # eta^2
 NUM_AGENTS = 100
 \end{verbatim}
 \noindent the correlation between two agents' preferences is around 0.7, which we determined to be a sound basic representation of truth (see line 30 of sim.py).
-\\\\Under this scheme, preferences are extremely parametrizable, and we are able to deliver more robust results from our algorithms by testing them on various preference sets.
-
+\\\\Under this scheme, preferences are extremely parameterizable, and we are able to deliver more robust results from our algorithms by testing them on various preference sets.
+ 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Algorithms}
 %%TODO, JERRY TALK ABOUT THE IMPLEMENTATION OF TTC AND YRM AND HOW THEY DIFFER IN INPUT AND OUTPUT
-
+ 
 We first describe and implement Gale's celebrated \textit{Top Trading Cycles} algorithms. TTC is a canonical algorithm for the \textit{housing allocation with existing tenants} problem. More specifically, there are $n$ agents and $n$ items. Each agent has a strict preference over all the items. Every agent can own at most one item. Before the algorithm starts, every agent owns exactly one item. After the algorithm, every agent also owns exactly one item, which may or may not be the same item it started with. 
-
+ 
 In English, the TTC algorithm proceeds as follows. In each round, each agent points to the agent that owns the most preferred item among all the remaining items. If, in any round, any cycles form, we perform the trade on each cycle. A \textit{cycle} is when agent $i_1$ points to agent $i_2$, agent $i_2$ points to agent $i_3$, ..., agent $i_{k-1}$ points to agent $i_k$. agent $i_k$ points to agent $i_1$. A cycle can be a self-loop if $k=1$, that is, the agent trades with itself and remove itself from the mechanism, or a $k$-cycle for $k>2$ in which case the cycle trade described above applies. We perform a trade on this cycle by assigning each agent the item she points to in the cycle, that is, assign agent $i_1$ the item owned by agent $i_2$, and so on. Then we remove all agents and items involved in the cycle trade. Repeat until there are no agents left.
-
-It is not immediately evident that the above verbal description of TTC provides a well-defined algorithm. Does it always terminate? Are the top-preference cycles well defined? To guarantee that, we need anxillary mathematical results. We can prove (for example, Lemma 12.1 in lecture 12) that the directed graph formed in each round of the TTC mechanism includes at least one cycle, and when multiple cycles form in a round they are vertex-disjoint. The existence of a cycle in each round guarantees that the algorithm terminates in at most $n$ steps, since a cycle means at least one agent is removed in that round, and there are $n$ agents. The vertex-disjoint property of the cycle means that in each round no agent is traded in more than one cycle, so the trade-around-the-cycle mechanism is well-defined. 
-
+ 
+It is not immediately evident that the above verbal description of TTC provides a well-defined algorithm. Does it always terminate? Are the top-preference cycles well defined? To guarantee that, we need ancillary mathematical results. We can prove (for example, Lemma 12.1 in lecture 12) that the directed graph formed in each round of the TTC mechanism includes at least one cycle, and when multiple cycles form in a round they are vertex-disjoint. The existence of a cycle in each round guarantees that the algorithm terminates in at most $n$ steps, since a cycle means at least one agent is removed in that round, and there are $n$ agents. The vertex-disjoint property of the cycle means that in each round no agent is traded in more than one cycle, so the trade-around-the-cycle mechanism is well-defined. 
+ 
 We also use the above mathematical result to aid our implementation of TTC, which is in a file called \texttt{algos.py}. We keep track of the remaining agents (not yet traded) in \texttt{agents\textunderscore remaining} and we repeat the round until all agents are traded, that is, \texttt{agents\textunderscore remaining} is empty. In each round, we first identify which agents are in a cycle and which are not. This is well-defined by the above result. The categorization begins by putting agents into three categories (variables in the implementation) \texttt{isCycle, isNotCycle, unknown}. At first, all agents are in unknown. Then, we pick an agent, say A0, from unknown, then we see what agent A0 points to (the agent that owns A0's most preferred item among the available ones), say A1, and so on. We keep track of the chain of agents in \texttt{cycle\textunderscore track}, adding one agent at a time. So, for example, \texttt{cycle\textunderscore track} is [A0, A1, A2] means A0 points to A1 and A1 points to A2. Each agent can point to one, and only one, agent among the available ones so this is well-defined. Since there are a finite number of agents, eventually the last agent will point to an agent that already exists in \texttt{cycle\textunderscore track}, say [A0, A1, A2] and A2 points to A1. We have found a cycle. The repeated agent until the end of \texttt{cycle\textunderscore track} is a cycle while all the agents before that are not in a cycle. We track this with\texttt{start\textunderscore index}. In the example above, A1 is  a repeated agent and appears in index 1, so \texttt{cycle\textunderscore track}, starting from index 1, that is, [A1, A2] is a cycle, and agents before index 1, that is, A0, is not a cycle. Then we remove all agents above from \texttt{unknown}. Repeat until \texttt{unknown} is empty, and all agents are correctly categorized in this round whether they are in a cycle or not. Then we perform trades on top-preference cycles and remove them from \texttt{agent\textunderscore remaining} while those in \texttt{isNotcycle} remain for the next round.
-
+ 
 The second algorithm we consider is \textsc{You Request My House-I Get Your Turn} or \textsc{YRMH-IGYT} mechanism. This algorithm, like TTC, also deals with the house allocation with existing tenants problem, but we relax the condition that every agent owns an item at the beginning. YRMH-IGYT permits some agents, but not necessarily all, to own one item at the beginning of the algorithm. The case where all agents own an item at the beginning, and no agents own an item at the beginning, are both permissible limit cases.
-
+ 
 First we define a priority list $f$ of agents. Then, assign the agent ordered first in $f$ to her most preferred house; assign the agent ordered second in $f$ to her most preferred house among remaining ones; and so on, until an agent requests the occupied house of
 an existing tenant. If at that point the existing tenant whose occupied house is requested
 has already been assigned a house, do not disturb the procedure. Otherwise, update the remainder of the priority-order by inserting that existing tenant to the top and proceed.
-
+ 
 If at any point a loop forms, it is formed exclusively by a subset of existing tenants who
 request the occupied houses of one another. In such cases remove all agents in the loop
 by assigning them the houses they request and proceed.
-
+ 
 [I copy the above description verbatim from a paper called "Fair and Efficient Discrete Resource Allocation: A Market Approach" by Ozgun Ekici]
-
+ 
 The version we implemented here does not a priori define the priority list $f$. Rather, $f$ is a random permutation of all agents, where each permutation is equally likely. Some sources call this a Randomized You Request My House-I Get Your Turn or RYRMH-IGYT. The non-random YRMH-IGYT suffers from the fairness problem: the agents earlier in the priority list is clearly favored over the agents later in the priority list. To solve this problem, we make the priority list random.
-
+ 
 Our implementation of RYRMH-IGYT goes as follows. \texttt{priority\textunderscore list} is a random permutation of all agents. In each turn, the active agent \texttt{curr\textunderscore agent} is the first agent in the priority list. It requests an item \texttt{requested\textunderscore item} (which cannot be None) owned by \texttt{requested\textunderscore item\textunderscore owner} (which may be None). If there is no owner, then per the algorithm, we assign the requested item to current agent, remove the agent from the priority list (because the assignment is final) and we are done for this round. If the item has an owner, then the owner \texttt{requested\textunderscore item\textunderscore owner} is moved to the front of the priority list. We keep track of all unsuccessful requests in \texttt{request\textunderscore loop}. If a successful request (i.e. the requested item has no owner), then we clear \texttt{request\textunderscore loop}. Every time an unsuccessful request happens, we check whenever there is a new unsuccessful request whether there is a loop or not using the index technique similar to what we did in TTC (the index variable here is \texttt{loop\textunderscore start \textunderscore index}). If there is a loop, we perform a trade on the cycle and clear \texttt{request\textunderscore loop}. Since there is a finite number of agents, eventually either a successful request happens, or unsuccessful requests pile up in \texttt{request\textunderscore loop} until a loop occurs, so the algorithm always terminate.
-
+ 
 The final algorithm we implement is the Probabilistic Serial mechanism, a special case of the group of algorithms known as "Eating Algorithms", a name that fits very nicely! The algorithm involves a unit block of time, where at each $t \in [0, 1]$, each agent is "consuming" some probability of acquiring some item, where the item they are each eating is their top-rated, available (i.e., not totally consumed) item.\\\\In our implementation\footnote{NB: For the remainder of the section, we will call the reader's attention to various line numbers in the file \text{prob\textunderscore serial.py}.}, we model continuous time as arbitrarily resolute time-slices, and we denote each slice as a \emph{round}.
-\\\\Each item has a corresponding number of "morsels" that it has left (line 15): this denotes implicitly the fraction of the item's probability that is "left". In each round, an agent takes one bite out of the item that they most prefer of the set of items reminding, i.e., they acquire one morsel of the item that they are most partial towards, from all the items that still have morsels. In each iteration, the order of agents is shuffled (line 52; so as to eliminate the possibility of a corner case wherein there are several instances when each of $n$ agents wants to eat the same item, with fewer than $n$ morsels remaining, benefiting the first few agents in the order). At the end, the probability distribution is output (line 82; 85) in either fractional or decimal form, and we check that the resulting matrix (rows of houses, columns of agents) is doubly stochastic, i.e., all the rows and all the columns sum to 1. This is the expected behavior, because assuming well-defined preferences over every item, and that each agent owns a house to begin with, the probability that an agent gets no house should be 0, and the probability that a particular house is not allocated should be 0. (To see output for PS, run the procedure \emph{test\textunderscore ps()} from the file.)\\\\We note that moving from this probability matrix to an allocation is a trivial matter of flipping a biased coin and allocating each house sequentially, and is not implemented in our project, as most outputs of PS that we've seen in the literature is the doubly-stochastic matrix rather than an outcome drawn from that distribution.
-
+\\\\Each item has a corresponding number of "morsels" that it has left (line 15): this denotes implicitly the fraction of the item's probability that is "left". In each round, an agent takes one bite out of the item that they most prefer of the set of items reminding, i.e., they acquire one morsel of the item that they are most partial towards, from all the items that still have morsels. In each iteration, the order of agents is shuffled (line 52; so as to eliminate the possibility of a corner case wherein there are several instances when each of $n$ agents wants to eat the same item, with fewer than $n$ morsels remaining, benefiting the first few agents in the order). At the end, the probability distribution is output (line 82; 85) in either fractional or decimal form, and we check that the resulting matrix (rows of houses, columns of agents) is doubly stochastic, i.e., all the rows and all the columns sum to 1. This is the expected behavior, because assuming well-defined preferences over every item, and that each agent owns a house to begin with, the probability that an agent gets no house should be 0, and the probability that a particular house is not allocated should be 0. (To see output for PS, run the procedure \emph{test\textunderscore ps()} from the file.)\\\\We note that moving from this probability matrix to an allocation is a matter of decomposing it via the Birkhoff–von Neumann algorithm for the decomposition of doubly stochastic matrices into a convex combination of permutation matrices so that choosing a permutation is a trivial problem. This extension is not implemented in our project, as most outputs of PS that we've seen in the literature is the doubly-stochastic matrix rather than an outcome drawn from that distribution. However, it would be fairly simple to do so, as numpy has a very handy package for exactly this purpose.
+ 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Metrics}
 %%TODO, JERRY TALK ABOUT THE MATHEMATICAL DEFINITION OF YOUR METRICS AND ABOUT THE IMPLEMENTATION OF YOUR METRICS
@@ -128,30 +128,57 @@ Definition. A \textit{sorted preference list} of agent $a$ is a list $[p_1, \cdo
 
 Definition. An allocation is \textit{ex-ante ordinal envy-free} if for every agent $a$, the sorted preference list of $a$ stochastically dominates the sorted preference list of $a'$ for any agent $a'$.
 
+The above is the ordinal version of envy-free where what only matters for agents are the rankings, not the numbers. Stochastic dominance is a way to compare two probability lists without numbers. There is another version, the cardinal version, where each agent has a separable additive utility function over agents. In which case, cardinal envy-freeness means for every agent $a$ with utility $u_a$, agent $a$'s allocation results in weakly higher utility than any agent $a'$'s allocation with utility function $u_a$. More formally,
 
+Definition. Given a set of agents $a_0,\cdots,a_{n-1}$ with utility functions $u_0,\dots,u_{n-1}$. The allocations $\pi_i$ to agent $a_i$ ($0 \leq i \leq n-1$) is cardinal envy-free if for any $i,i'$, $u_i(\pi_i) \geq u_i(\pi_{i'})$.
 
+Our implementation in \texttt{metrics.py} follows the above chain of definitions quite closely. In the cardinal case, for each agent, we simply compute the utility resulted from  that agent's allocation and compare it to other agents' allocation. In the ordinal case, the \texttt{sort\textunderscore pref} function implements the sorted preference list, and \texttt{list\textunderscore sd} checks if the first list stochastically dominates the second list. Then we combine these two functions to implement ordinal envy-freeness. The two implementations are under the same umbrella function $\texttt{IsEnvyFree}$ where you can specify whether we want to check cardinal envy-freeness (type cardinal) or ordinal envy-freeness (type sd, which stands for stochastic dominance).
 
+The second criterion we consider is Pareto Optimality. Intuitively, Pareto optimality means you cannot make someone better off without making someone else worse off. 
 
+Definition. An allocation $\pi = (\pi_0,\dots,\pi_{n-1})$ to agents $0,1,\dots,n-1$ \textit{weakly Pareto dominates} another allocation $\pi' = (\pi'_0,\dots,\pi'_{n-1})$ if every agent $i$ weakly prefers $\pi_i$ over $\pi'_i$.
+
+Definition. An allocation $\pi$ is Pareto Optimal if it  weakly Pareto dominates every other allocation.
+
+Note that any allocation weakly Pareto dominates itself, so the ``every other allocation'' in the above definition can be replaced by ``every allocation''. If there is no randomness involved, such as in TTC or YRMH-IGYT, we can simply enumerate all $n!$ possible allocations and check if the given allocation Pareto dominates all of them. In fact, this is precisely how we implement $\texttt{IsParetoOptimal}$. The function returns $\texttt{True}$ if the given allocation is Pareto optimal, and returns a Pareto-dominating allocation if the given allocation is not Pareto optimal. 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Experimental Results}
 %% PUT TTC, YRM, EF, PO TEST OUTPUT HERE AND EXPLAIN THE CONFIGURATION THAT YOU USED. SEE LINES 55-85 FOR A MODEL
 TTC is tested in sim.py and outputs, for example:
 \begin{verbatim}
-initial agents (id item_owned ordinal_preferences)
-1 0 [4, 1, 2, 3, 0]
-3 1 [3, 1, 2, 4, 0]
-0 2 [4, 1, 3, 2, 0]
-2 3 [4, 1, 3, 2, 0]
-4 4 [3, 1, 2, 4, 0]
-TTC agents
-1 0 [4, 1, 2, 3, 0]
-3 1 [3, 1, 2, 4, 0]
-0 2 [4, 1, 3, 2, 0]
-2 4 [4, 1, 3, 2, 0]
-4 3 [3, 1, 2, 4, 0]
+-------------------- TTC TESTING --------------------
+Input agents
+Agent 3 owns item 0 and has ordinal pref [2, 0, 3, 1, 4]
+Agent 1 owns item 1 and has ordinal pref [3, 0, 4, 1, 2]
+Agent 4 owns item 2 and has ordinal pref [1, 0, 4, 2, 3]
+Agent 0 owns item 3 and has ordinal pref [2, 0, 3, 4, 1]
+Agent 2 owns item 4 and has ordinal pref [0, 1, 3, 2, 4]
+TTC Output agents
+Agent 3 owns item 0 and has ordinal pref [2, 0, 3, 1, 4]
+Agent 1 owns item 3 and has ordinal pref [3, 0, 4, 1, 2]
+Agent 4 owns item 1 and has ordinal pref [1, 0, 4, 2, 3]
+Agent 0 owns item 2 and has ordinal pref [2, 0, 3, 4, 1]
+Agent 2 owns item 4 and has ordinal pref [0, 1, 3, 2, 4]
+Is TTC Pareto Optimal? If yes, says True. If no, returns a Pareto-dominating allocation
+True
+-------------------- YRMH-IGYT TESTING --------------------
+Input agents
+Agent 0 owns item 0 and has ordinal pref [4, 2, 0, 1, 3]
+Agent 4 owns item 1 and has ordinal pref [1, 3, 4, 2, 0]
+Agent 2 owns item None and has ordinal pref [1, 3, 4, 2, 0]
+Agent 1 owns item None and has ordinal pref [4, 1, 3, 0, 2]
+Agent 3 owns item None and has ordinal pref [2, 4, 0, 1, 3]
+YRMH-IGYT Output agents
+Agent 0 owns item 4 and has ordinal pref [4, 2, 0, 1, 3]
+Agent 4 owns item 1 and has ordinal pref [1, 3, 4, 2, 0]
+Agent 2 owns item 3 and has ordinal pref [1, 3, 4, 2, 0]
+Agent 1 owns item 0 and has ordinal pref [4, 1, 3, 0, 2]
+Agent 3 owns item 2 and has ordinal pref [2, 4, 0, 1, 3]
+Is YRMH-IGYT Pareto Optimal? If yes, says True. If no, returns a Pareto-dominating allocation
+True
 \end{verbatim}
 Here, preferences are generated via the double-normal distribution.\\\\The testing for YRM is similar, except the number of houses assigned is less than the total number of agents, but the output format is identical.
-
+ 
 The test suite for PS resides in \text{test\textunderscore PS()} and allows for a wide variety of parametrization. A user may set the number of agents and the way their preferences are generated (via config), whether the output should be in fractional or decimal form, and how, if at all, to truncate the fractional values' denominators in their rational approximations.\\\\Speed testing confirms that our implementation is linear in the number of rounds and semiquadratic in the number of agents, i.e., $O(|N|^2r)$ for $r=$ number of rounds. We attribute this to the fact that for each round, for each agent, $O(|N|)$ items must be looked through to find the first available item. In a more performance-oriented setting, this could be cut down to $O(|N|r)$ by memoizing the last item eaten and doing a constant-time check to see if it is still available.\\\\Consider our test suite for PS: 
 \begin{verbatim} 
 def test_PS(): 
@@ -194,6 +221,7 @@ Row Sum (should be 1s): [1.0, 1.0, 1.0, 1.0, 1.0]
 %%%%%%%%%%%%%%%%%%%%% 
 %%%%%%%%%%%%%%%%%%%%%
 \section*{Conclusion}
+We learned a great deal during this project about advanced matching algorithms, preference generation, and the (large) difference between theoretical algorithmic handwaving and putting code on a screen. Our biggest challenges through the process were devising a clear and coherent API so that all the preferences, agents, algorithms, and metrics played well with one another; creating a preference system that wasn't too identical and wasn't too independent (we called this our Goldilocks preference scheme!); and muddling through a particularly bad set of bugs in TTC (turns out there was a 5-way namespace collision across 3 classes that we didn't catch for hours...). However, as usual, seeing the algorithms run and return coherent and efficient results was incredibly exciting and rewarding, and the project has piqued our interest in possibly extending our work.
 %%%%%%%%%%%%%%%%%%%%%
-
+ 
 \end{document}
